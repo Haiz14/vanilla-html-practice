@@ -1,20 +1,17 @@
 TODO
 
-- ~~0.2: multiple bg practice~~
-  - ~~boilerplate html~~
-  - ~~scripts loading~~
-  - ~~3 blocks of text~~
-  - ~~style~~
-  - ~~opengraph~~
 
 - 0.3: varied element (black and white palette) pot
-  - points
+  - data
     - intro
     - stats
-    - specs
+    - charecters
     - reviews
     - final note
     - footer (self-promotion)
+  - sizing
+    - vars
+    - added to html
 
 - 0.4: (subsections)
 
@@ -27,3 +24,9 @@ TODO
 
 dome:
 - ~~0.1: gwdgets-india~~
+- ~~0.2: multiple bg practice~~
+  - ~~boilerplate html~~
+  - ~~scripts loading~~
+  - ~~3 blocks of text~~
+  - ~~style~~
+  - ~~opengraph~~
