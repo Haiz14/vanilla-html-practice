@@ -6,12 +6,31 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<meta property="og:title" content="Colored section &amp; Practice of tailwind" />
 	<meta property="og:type" content="website" />
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+	<link href="https://fonts.googleapis.com/css2?family=Brawler:wght@400;700&display=swap" rel="stylesheet">
 	<meta property="og:url" content="https://haiz14.github.io/vanilla-html-practice/colored-sections" />
 	<script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp"></script>
+	<style>
+		
+.doto-hi {
+  font-family: "Doto", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  font-variation-settings:
+    "ROND" 0;
+}
+
+	</style>
 	<script>
 		tailwind.config = {
 			theme: {
 				extend: {
+					fontFamily: {
+						normal: `Brawler, theme("fontFamily.serif")` ,
+					},
 					backgroundImage: {
 							'cool-gray': `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25' viewBox='0 0 2 1'%3E%3Cdefs%3E%3ClinearGradient id='a' gradientUnits='userSpaceOnUse' x1='0' x2='0' y1='0' y2='1'%3E%3Cstop offset='0' stop-color='%23CFDCE2'/%3E%3Cstop offset='1' stop-color='%23EAE8FF'/%3E%3C/linearGradient%3E%3ClinearGradient id='b' gradientUnits='userSpaceOnUse' x1='0' y1='0' x2='0' y2='1' gradientTransform='rotate(0,0.5,0.5)'%3E%3Cstop offset='0' stop-color='%23FAEDFF' stop-opacity='0'/%3E%3Cstop offset='1' stop-color='%23FAEDFF' stop-opacity='1'/%3E%3C/linearGradient%3E%3ClinearGradient id='c' gradientUnits='userSpaceOnUse' x1='0' y1='0' x2='2' y2='2' gradientTransform='rotate(195,0.5,0.5)'%3E%3Cstop offset='0' stop-color='%23FAEDFF' stop-opacity='0'/%3E%3Cstop offset='1' stop-color='%23FAEDFF' stop-opacity='1'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect x='0' y='0' fill='url(%23a)' width='2' height='1'/%3E%3Cg fill-opacity='0.5'%3E%3Cpolygon fill='url(%23b)' points='0 1 0 0 2 0'/%3E%3Cpolygon fill='url(%23c)' points='2 1 2 0 0 0'/%3E%3C/g%3E%3C/svg%3E");`,
 						'neutral-cool-grayish-pattern': `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25' viewBox='0 0 2 1'%3E%3Cdefs%3E%3ClinearGradient id='a' gradientUnits='userSpaceOnUse' x1='0' x2='0' y1='0' y2='1'%3E%3Cstop offset='0' stop-color='%239CA6AA'/%3E%3Cstop offset='1' stop-color='%23F9F8FF'/%3E%3C/linearGradient%3E%3ClinearGradient id='b' gradientUnits='userSpaceOnUse' x1='0' y1='0' x2='0' y2='1' gradientTransform='rotate(0,0.5,0.5)'%3E%3Cstop offset='0' stop-color='%23FFEEFF' stop-opacity='0'/%3E%3Cstop offset='1' stop-color='%23FFEEFF' stop-opacity='1'/%3E%3C/linearGradient%3E%3ClinearGradient id='c' gradientUnits='userSpaceOnUse' x1='0' y1='0' x2='2' y2='2' gradientTransform='rotate(0,0.5,0.5)'%3E%3Cstop offset='0' stop-color='%23FFEEFF' stop-opacity='0'/%3E%3Cstop offset='1' stop-color='%23FFEEFF' stop-opacity='1'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect x='0' y='0' fill='url(%23a)' width='2' height='1'/%3E%3Cg fill-opacity='0.5'%3E%3Cpolygon fill='url(%23b)' points='0 1 0 0 2 0'/%3E%3Cpolygon fill='url(%23c)' points='2 1 2 0 0 0'/%3E%3C/g%3E%3C/svg%3E");`,
@@ -23,9 +42,9 @@
 		}
 	</script>
 </head>
-<body class="bg-cool-gray bg-cover divide-y-4 divide-gray-500">
+<body class=" divide-y-4 divide-gray-500 font-normal">
 	<div class="first:pt-2 py-12 px-4 odd:bg-gray-200 even:bg-gray-100 text-gray-900">
-		<p>
+		<p class="">
 Jaane kahaan meraa jigar gayaa ji
 Abhi abhi yahin thaa kidhar gayaa ji
 Kisi ki adaaon pe mar gayaa ji
@@ -40,7 +59,7 @@ Kisi ki adaaon pe mar gayaa ji
 Badi badi ankhiyon se dar gayaa ji
 		</p>
 	</div>
-	<div class="first:pt-2 last:pb-2 py-12 px-4 odd:bg-gray-200 even:bg-gray-100 text-gray-900">
+	<div class="first:pt-2 py-12 px-4 odd:bg-gray-200 even:bg-gray-100 text-gray-900">
 		<p class="prose">
 Yahan use laae kaahe ko binaa kaam re
 Jaldi jaldi dhuundho ke hone lagii shaam re
@@ -48,6 +67,8 @@ Yahan use laae kaahe ko binaa kaam re
 Jaldi jaldi dhuundho ke hone lagii shaam re
 		</p>
 	</div>
-
+	<div>
+		<p class="pt-4 text-center text-gray-300 text-3xl divide-none "> the end </p>
+	</div>
 </body>
 </html>
