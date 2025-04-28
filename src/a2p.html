@@ -78,23 +78,23 @@
         <div class="flex flex-col md:flex-row items-start justify-center mb-6 space-y-4 md:space-y-0 md:space-x-4">
             <div id="dualInputContainer" class="w-full md:w-1/2 flex flex-col md:flex-row items-start md:items-end space-y-4 md:space-y-0 md:space-x-4">
                  <div class="w-full md:w-auto flex-1">
-                    <label for="adjacentRatio" class="block text-sm font-medium text-gray-700 mb-1">Adjacent Side Ratio:</label>
-                    <input type="number" id="adjacentRatio" value="5" min="1" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                </div>
-                <div class="w-full md:w-auto flex-1">
-                    <label for="oppositeRatio" class="block text-sm font-medium text-gray-700 mb-1">Opposite Side Ratio:</label>
-                    <input type="number" id="oppositeRatio" value="8" min="1" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                </div>
+                     <label for="adjacentRatio" class="block text-sm font-medium text-gray-700 mb-1">Adjacent Side Ratio:</label>
+                     <input type="number" id="adjacentRatio" value="5" min="1" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                 </div>
+                 <div class="w-full md:w-auto flex-1">
+                     <label for="oppositeRatio" class="block text-sm font-medium text-gray-700 mb-1">Opposite Side Ratio:</label>
+                     <input type="number" id="oppositeRatio" value="8" min="1" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                 </div>
             </div>
 
             <div id="singleInputContainer" class="w-full md:w-1/2 hidden">
-                <div class="w-full">
-                    <label for="combinedRatioInput" class="block text-sm font-medium text-gray-700 mb-1">Side Ratios (Adjacent, Opposite):</label>
-                    <input type="text" id="combinedRatioInput" placeholder="e.g., 5,8" value="5,8" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                </div>
+                 <div class="w-full">
+                     <label for="combinedRatioInput" class="block text-sm font-medium text-gray-700 mb-1">Side Ratios (Adjacent, Opposite):</label>
+                     <input type="text" id="combinedRatioInput" placeholder="e.g., 5,8" value="5,8" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                 </div>
              </div>
 
-            <div class="w-full md:w-auto flex items-end pt-5 md:pt-0"> <button id="drawButton" class="w-full md:w-auto px-6 py-2 bg-blue-600 text-white font-semibold rounded-md shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">Draw Triangle & Calculate Angles</button>
+            <div class="w-full md:w-auto flex items-end pt-5 md:pt-0"> <button id="drawButton" class="w-full md:w-auto px-6 py-2 bg-blue-600 text-white font-semibold rounded-md shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">Draw Triangle & Calculate</button>
             </div>
         </div>
 
@@ -103,6 +103,10 @@
 
         <canvas id="triangleCanvas" width="600" height="400"></canvas>
 
+        <div id="ratioDisplay" class="mt-2 text-center text-sm text-gray-700">
+            </div>
+        <div id="inverseRatioDisplay" class="mt-1 text-center text-sm text-gray-700">
+            </div>
         <div id="messageBox" class="mt-4 p-3 bg-yellow-100 text-yellow-800 rounded-md hidden"></div>
     </div>
 
@@ -119,6 +123,11 @@
         const inputModeToggle = document.getElementById('inputModeToggle');
         const dualInputContainer = document.getElementById('dualInputContainer');
         const singleInputContainer = document.getElementById('singleInputContainer');
+
+        // Get the new ratio display elements
+        const ratioDisplay = document.getElementById('ratioDisplay');
+        const inverseRatioDisplay = document.getElementById('inverseRatioDisplay');
+
 
         let isSingleInputMode = false; // Keep track of the current mode
 
@@ -149,8 +158,8 @@
                 // Optional: Sync values when switching
                 // const ratios = combinedRatioInput.value.split(',').map(s => s.trim());
                 // if (ratios.length === 2 && !isNaN(parseInt(ratios[0])) && !isNaN(parseInt(ratios[1]))) {
-                //     adjacentRatioInput.value = ratios[0];
-                //     oppositeRatioInput.value = ratios[1];
+                //      adjacentRatioInput.value = ratios[0];
+                //      oppositeRatioInput.value = ratios[1];
                 // }
             }
              // Trigger a redraw with current values after switching mode
@@ -171,6 +180,8 @@
                 if (parts.length !== 2) {
                     showMessage("Please enter two numbers separated by a comma (e.g., 5,8).", 'error');
                     anglesDisplay.textContent = ''; // Clear angles display on error
+                    ratioDisplay.textContent = ''; // Clear ratio display
+                    inverseRatioDisplay.textContent = ''; // Clear inverse ratio display
                     return;
                 }
 
@@ -190,10 +201,12 @@
                     : "Please enter valid positive numbers for both adjacent and opposite side ratios.";
                 showMessage(errorMessage, 'error');
                 anglesDisplay.textContent = ''; // Clear angles display on error
+                ratioDisplay.textContent = ''; // Clear ratio display
+                inverseRatioDisplay.textContent = ''; // Clear inverse ratio display
                 return;
             }
 
-            // --- Rest of the drawing and calculation logic (unchanged) ---
+            // --- Calculations ---
 
             // Calculate angles
             const angleRadiansA = Math.atan2(oppositeRatio, adjacentRatio);
@@ -201,8 +214,16 @@
             const angleRadiansB = Math.atan2(adjacentRatio, oppositeRatio);
             const angleDegreesB = (angleRadiansB * 180) / Math.PI;
 
-            // Display angles
-            anglesDisplay.textContent = `${angleDegreesB.toFixed(2)}°, ${angleDegreesA.toFixed(2)}°`;
+            // Calculate Ratios for display
+            const adjOppRatio = adjacentRatio / oppositeRatio;
+            const oppAdjRatio = oppositeRatio / adjacentRatio; // This is the inverse
+
+            // --- Display Results ---
+            anglesDisplay.textContent = `Angles: ${angleDegreesB.toFixed(2)}°, ${angleDegreesA.toFixed(2)}°`;
+            ratioDisplay.textContent = `Adj / Opp Ratio: ${adjOppRatio.toFixed(4)}`; // Display Adjacent/Opposite
+            inverseRatioDisplay.textContent = `Opp / Adj Ratio: ${oppAdjRatio.toFixed(4)}`; // Display Opposite/Adjacent
+
+            // --- Canvas Drawing ---
 
             // Clear the canvas
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -241,7 +262,7 @@
 
          // Initial UI setup based on checkbox default (unchecked = single mode initially based on HTML)
         inputModeToggle.checked = false; // Start in Single Input mode
-        updateInputModeUI(); // Set initial visibility
+        updateInputModeUI(); // Set initial visibility and draw
 
         // Listener for the toggle switch
         inputModeToggle.addEventListener('change', updateInputModeUI);
@@ -256,21 +277,18 @@
                 drawTriangle();
             }
         });
-
         oppositeRatioInput.addEventListener('keyup', function(event) {
             if (event.key === 'Enter') {
                 event.preventDefault();
                 drawTriangle();
             }
         });
-
-         combinedRatioInput.addEventListener('keyup', function(event) {
+        combinedRatioInput.addEventListener('keyup', function(event) {
             if (event.key === 'Enter') {
                 event.preventDefault();
                 drawTriangle();
             }
         });
-
 
         // Redraw on window resize
         window.addEventListener('resize', () => {
