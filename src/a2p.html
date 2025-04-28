@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Right Angle Triangle Drawer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for the canvas */
+        canvas {
+            background-color: #f0f0f0; /* Light grey background for the canvas */
+            display: block;
+            margin: 20px auto; /* Center the canvas */
+            border: 1px solid #ccc; /* Add a border */
+            max-width: 100%; /* Ensure canvas is responsive */
+            height: auto; /* Maintain aspect ratio */
+        }
+    </style>
+</head>
+<body class="font-sans bg-gray-100 p-6">
+
+    <div class="container mx-auto bg-white p-6 rounded-lg shadow-md">
+        <h1 class="text-2xl font-bold mb-4 text-center">Right Angle Triangle Drawer</h1>
+
+        <div class="flex flex-col md:flex-row items-center justify-center mb-6 space-y-4 md:space-y-0 md:space-x-4">
+            <div class="w-full md:w-1/4">
+                <label for="adjacentRatio" class="block text-sm font-medium text-gray-700 mb-1">Adjacent Side Ratio:</label>
+                <input type="number" id="adjacentRatio" value="5" min="1" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <div class="w-full md:w-1/4">
+                <label for="oppositeRatio" class="block text-sm font-medium text-gray-700 mb-1">Opposite Side Ratio:</label>
+                <input type="number" id="oppositeRatio" value="8" min="1" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <button id="drawButton" class="px-6 py-2 bg-blue-600 text-white font-semibold rounded-md shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">Draw Triangle & Calculate Angles</button>
+        </div>
+
+        <div id="anglesDisplay" class="mt-4 text-center text-lg font-semibold text-gray-800">
+            </div>
+
+        <canvas id="triangleCanvas" width="600" height="400"></canvas>
+
+        <div id="messageBox" class="mt-4 p-3 bg-yellow-100 text-yellow-800 rounded-md hidden"></div>
+    </div>
+
+    <script>
+        // Get canvas and context
+        const canvas = document.getElementById('triangleCanvas');
+        const ctx = canvas.getContext('2d');
+        const drawButton = document.getElementById('drawButton');
+        const adjacentRatioInput = document.getElementById('adjacentRatio');
+        const oppositeRatioInput = document.getElementById('oppositeRatio');
+        const anglesDisplay = document.getElementById('anglesDisplay');
+        const messageBox = document.getElementById('messageBox');
+
+        // Function to show messages in the message box
+        function showMessage(message, type = 'info') {
+            messageBox.textContent = message;
+            messageBox.className = `mt-4 p-3 rounded-md ${type === 'error' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'}`;
+            messageBox.classList.remove('hidden');
+        }
+
+        // Function to hide the message box
+        function hideMessageBox() {
+            messageBox.classList.add('hidden');
+        }
+
+        // Function to draw the triangle
+        function drawTriangle() {
+            hideMessageBox(); // Hide previous messages
+
+            const adjacentRatio = parseInt(adjacentRatioInput.value);
+            const oppositeRatio = parseInt(oppositeRatioInput.value);
+
+            // Validate input
+            if (isNaN(adjacentRatio) || adjacentRatio <= 0 || isNaN(oppositeRatio) || oppositeRatio <= 0) {
+                showMessage("Please enter valid positive numbers for both adjacent and opposite side ratios.", 'error');
+                anglesDisplay.textContent = ''; // Clear angles display on error
+                return;
+            }
+
+            // Calculate angles
+            // Angle opposite the opposite side (angle A) = atan(opposite / adjacent)
+            const angleRadiansA = Math.atan2(oppositeRatio, adjacentRatio);
+            const angleDegreesA = (angleRadiansA * 180) / Math.PI;
+
+            // Angle opposite the adjacent side (angle B) = atan(adjacent / opposite)
+            const angleRadiansB = Math.atan2(adjacentRatio, oppositeRatio);
+            const angleDegreesB = (angleRadiansB * 180) / Math.PI;
+
+            // Display angles
+            anglesDisplay.textContent = `${angleDegreesB.toFixed(2)}°, ${angleDegreesA.toFixed(2)}°`;
+
+            // Clear the canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Determine scaling factor to fit triangle within canvas
+            // We want the triangle to take up a good portion of the canvas, but not overflow.
+            // The ratio of sides is adjacentRatio : oppositeRatio.
+            // We need to find a scale factor such that scaled_adjacent <= canvas.width and scaled_opposite <= canvas.height
+            // Let scaled_adjacent = adjacentRatio * scale, scaled_opposite = oppositeRatio * scale
+            // scale <= canvas.width / adjacentRatio and scale <= canvas.height / oppositeRatio
+            // So, scale = min(canvas.width / adjacentRatio, canvas.height / oppositeRatio)
+            // Add some padding to ensure it doesn't touch the edges
+            const padding = 40; // pixels
+            const maxCanvasWidth = canvas.width - padding;
+            const maxCanvasHeight = canvas.height - padding;
+
+            const scaleX = maxCanvasWidth / adjacentRatio;
+            const scaleY = maxCanvasHeight / oppositeRatio;
+
+            const scale = Math.min(scaleX, scaleY);
+
+            const adjacentLength = adjacentRatio * scale;
+            const oppositeLength = oppositeRatio * scale;
+
+            // Starting point (bottom-left corner of the right angle)
+            // Center the triangle horizontally and vertically
+            const startX = (canvas.width - adjacentLength) / 2;
+            const startY = (canvas.height + oppositeLength) / 2; // Adjusted for drawing upwards
+
+            // Draw the triangle
+            ctx.beginPath();
+            ctx.moveTo(startX, startY); // Bottom-left (right angle vertex)
+            ctx.lineTo(startX + adjacentLength, startY); // Bottom-right (end of adjacent side)
+            ctx.lineTo(startX, startY - oppositeLength); // Top-left (end of opposite side)
+            ctx.closePath(); // Close the path to form the triangle
+
+            // Style and fill the triangle
+            ctx.fillStyle = '#3b82f6'; // Blue color
+            ctx.fill();
+            ctx.strokeStyle = '#1e40af'; // Darker blue border
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+
+        // Draw initial triangle on page load
+        drawTriangle();
+
+        // Add event listener to the button
+        drawButton.addEventListener('click', drawTriangle);
+
+        // Add keypress event listeners to input fields for the Enter key
+        adjacentRatioInput.addEventListener('keyup', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault(); // Prevent default form submission
+                drawTriangle();
+            }
+        });
+
+        oppositeRatioInput.addEventListener('keyup', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault(); // Prevent default form submission
+                drawTriangle();
+            }
+        });
+
+
+        // Redraw on window resize to maintain responsiveness
+        window.addEventListener('resize', () => {
+             // Update canvas size if needed (optional, but good for responsiveness)
+             // canvas.width = canvas.parentElement.clientWidth;
+             // canvas.height = canvas.parentElement.clientHeight * 0.8; // Adjust height as needed
+             drawTriangle(); // Redraw the triangle
+        });
+
+    </script>
+
+</body>
+</html>
