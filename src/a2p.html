@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -16,6 +15,49 @@
             max-width: 100%; /* Ensure canvas is responsive */
             height: auto; /* Maintain aspect ratio */
         }
+        /* Style for the toggle switch */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #2196F3; /* Blue when checked */
+        }
+        input:focus + .slider {
+            box-shadow: 0 0 1px #2196F3;
+        }
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
     </style>
 </head>
 <body class="font-sans bg-gray-100 p-6">
@@ -23,16 +65,37 @@
     <div class="container mx-auto bg-white p-6 rounded-lg shadow-md">
         <h1 class="text-2xl font-bold mb-4 text-center">Right Angle Triangle Drawer</h1>
 
-        <div class="flex flex-col md:flex-row items-center justify-center mb-6 space-y-4 md:space-y-0 md:space-x-4">
-            <div class="w-full md:w-1/4">
-                <label for="adjacentRatio" class="block text-sm font-medium text-gray-700 mb-1">Adjacent Side Ratio:</label>
-                <input type="number" id="adjacentRatio" value="5" min="1" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+        <div class="flex items-center justify-center mb-4 space-x-3">
+            <span class="text-sm font-medium text-gray-700">Use Single Input (e.g., 5,8)</span>
+            <label class="switch">
+                <input type="checkbox" id="inputModeToggle">
+                <span class="slider round"></span>
+            </label>
+             <span class="text-sm font-medium text-gray-700">Use Dual Inputs</span>
+        </div>
+
+
+        <div class="flex flex-col md:flex-row items-start justify-center mb-6 space-y-4 md:space-y-0 md:space-x-4">
+            <div id="dualInputContainer" class="w-full md:w-1/2 flex flex-col md:flex-row items-start md:items-end space-y-4 md:space-y-0 md:space-x-4">
+                 <div class="w-full md:w-auto flex-1">
+                    <label for="adjacentRatio" class="block text-sm font-medium text-gray-700 mb-1">Adjacent Side Ratio:</label>
+                    <input type="number" id="adjacentRatio" value="5" min="1" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div class="w-full md:w-auto flex-1">
+                    <label for="oppositeRatio" class="block text-sm font-medium text-gray-700 mb-1">Opposite Side Ratio:</label>
+                    <input type="number" id="oppositeRatio" value="8" min="1" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                </div>
             </div>
-            <div class="w-full md:w-1/4">
-                <label for="oppositeRatio" class="block text-sm font-medium text-gray-700 mb-1">Opposite Side Ratio:</label>
-                <input type="number" id="oppositeRatio" value="8" min="1" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+
+            <div id="singleInputContainer" class="w-full md:w-1/2 hidden">
+                <div class="w-full">
+                    <label for="combinedRatioInput" class="block text-sm font-medium text-gray-700 mb-1">Side Ratios (Adjacent, Opposite):</label>
+                    <input type="text" id="combinedRatioInput" placeholder="e.g., 5,8" value="5,8" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                </div>
+             </div>
+
+            <div class="w-full md:w-auto flex items-end pt-5 md:pt-0"> <button id="drawButton" class="w-full md:w-auto px-6 py-2 bg-blue-600 text-white font-semibold rounded-md shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">Draw Triangle & Calculate Angles</button>
             </div>
-            <button id="drawButton" class="px-6 py-2 bg-blue-600 text-white font-semibold rounded-md shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">Draw Triangle & Calculate Angles</button>
         </div>
 
         <div id="anglesDisplay" class="mt-4 text-center text-lg font-semibold text-gray-800">
@@ -50,8 +113,14 @@
         const drawButton = document.getElementById('drawButton');
         const adjacentRatioInput = document.getElementById('adjacentRatio');
         const oppositeRatioInput = document.getElementById('oppositeRatio');
+        const combinedRatioInput = document.getElementById('combinedRatioInput');
         const anglesDisplay = document.getElementById('anglesDisplay');
         const messageBox = document.getElementById('messageBox');
+        const inputModeToggle = document.getElementById('inputModeToggle');
+        const dualInputContainer = document.getElementById('dualInputContainer');
+        const singleInputContainer = document.getElementById('singleInputContainer');
+
+        let isSingleInputMode = false; // Keep track of the current mode
 
         // Function to show messages in the message box
         function showMessage(message, type = 'info') {
@@ -65,26 +134,70 @@
             messageBox.classList.add('hidden');
         }
 
+        // Function to update UI based on input mode
+        function updateInputModeUI() {
+             isSingleInputMode = !inputModeToggle.checked; // Checked = Dual Mode
+
+            if (isSingleInputMode) {
+                dualInputContainer.classList.add('hidden');
+                singleInputContainer.classList.remove('hidden');
+                // Optional: Sync values when switching
+                // combinedRatioInput.value = `${adjacentRatioInput.value},${oppositeRatioInput.value}`;
+            } else {
+                dualInputContainer.classList.remove('hidden');
+                singleInputContainer.classList.add('hidden');
+                // Optional: Sync values when switching
+                // const ratios = combinedRatioInput.value.split(',').map(s => s.trim());
+                // if (ratios.length === 2 && !isNaN(parseInt(ratios[0])) && !isNaN(parseInt(ratios[1]))) {
+                //     adjacentRatioInput.value = ratios[0];
+                //     oppositeRatioInput.value = ratios[1];
+                // }
+            }
+             // Trigger a redraw with current values after switching mode
+            drawTriangle();
+        }
+
+
         // Function to draw the triangle
         function drawTriangle() {
             hideMessageBox(); // Hide previous messages
 
-            const adjacentRatio = parseInt(adjacentRatioInput.value);
-            const oppositeRatio = parseInt(oppositeRatioInput.value);
+            let adjacentRatio, oppositeRatio;
+
+            if (isSingleInputMode) {
+                const combinedValue = combinedRatioInput.value.trim();
+                const parts = combinedValue.split(',');
+
+                if (parts.length !== 2) {
+                    showMessage("Please enter two numbers separated by a comma (e.g., 5,8).", 'error');
+                    anglesDisplay.textContent = ''; // Clear angles display on error
+                    return;
+                }
+
+                adjacentRatio = parseInt(parts[0].trim());
+                oppositeRatio = parseInt(parts[1].trim());
+
+            } else {
+                adjacentRatio = parseInt(adjacentRatioInput.value);
+                oppositeRatio = parseInt(oppositeRatioInput.value);
+            }
+
 
             // Validate input
             if (isNaN(adjacentRatio) || adjacentRatio <= 0 || isNaN(oppositeRatio) || oppositeRatio <= 0) {
-                showMessage("Please enter valid positive numbers for both adjacent and opposite side ratios.", 'error');
+                 const errorMessage = isSingleInputMode
+                    ? "Please ensure both values in the single input are valid positive numbers (e.g., 5,8)."
+                    : "Please enter valid positive numbers for both adjacent and opposite side ratios.";
+                showMessage(errorMessage, 'error');
                 anglesDisplay.textContent = ''; // Clear angles display on error
                 return;
             }
 
+            // --- Rest of the drawing and calculation logic (unchanged) ---
+
             // Calculate angles
-            // Angle opposite the opposite side (angle A) = atan(opposite / adjacent)
             const angleRadiansA = Math.atan2(oppositeRatio, adjacentRatio);
             const angleDegreesA = (angleRadiansA * 180) / Math.PI;
-
-            // Angle opposite the adjacent side (angle B) = atan(adjacent / opposite)
             const angleRadiansB = Math.atan2(adjacentRatio, oppositeRatio);
             const angleDegreesB = (angleRadiansB * 180) / Math.PI;
 
@@ -94,75 +207,81 @@
             // Clear the canvas
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Determine scaling factor to fit triangle within canvas
-            // We want the triangle to take up a good portion of the canvas, but not overflow.
-            // The ratio of sides is adjacentRatio : oppositeRatio.
-            // We need to find a scale factor such that scaled_adjacent <= canvas.width and scaled_opposite <= canvas.height
-            // Let scaled_adjacent = adjacentRatio * scale, scaled_opposite = oppositeRatio * scale
-            // scale <= canvas.width / adjacentRatio and scale <= canvas.height / oppositeRatio
-            // So, scale = min(canvas.width / adjacentRatio, canvas.height / oppositeRatio)
-            // Add some padding to ensure it doesn't touch the edges
-            const padding = 40; // pixels
+            // Determine scaling factor
+            const padding = 40;
             const maxCanvasWidth = canvas.width - padding;
             const maxCanvasHeight = canvas.height - padding;
-
             const scaleX = maxCanvasWidth / adjacentRatio;
             const scaleY = maxCanvasHeight / oppositeRatio;
-
             const scale = Math.min(scaleX, scaleY);
 
             const adjacentLength = adjacentRatio * scale;
             const oppositeLength = oppositeRatio * scale;
 
-            // Starting point (bottom-left corner of the right angle)
-            // Center the triangle horizontally and vertically
+            // Starting point (centered)
             const startX = (canvas.width - adjacentLength) / 2;
-            const startY = (canvas.height + oppositeLength) / 2; // Adjusted for drawing upwards
+            const startY = (canvas.height + oppositeLength) / 2;
 
             // Draw the triangle
             ctx.beginPath();
-            ctx.moveTo(startX, startY); // Bottom-left (right angle vertex)
-            ctx.lineTo(startX + adjacentLength, startY); // Bottom-right (end of adjacent side)
-            ctx.lineTo(startX, startY - oppositeLength); // Top-left (end of opposite side)
-            ctx.closePath(); // Close the path to form the triangle
+            ctx.moveTo(startX, startY);
+            ctx.lineTo(startX + adjacentLength, startY);
+            ctx.lineTo(startX, startY - oppositeLength);
+            ctx.closePath();
 
-            // Style and fill the triangle
-            ctx.fillStyle = '#3b82f6'; // Blue color
+            // Style and fill
+            ctx.fillStyle = '#3b82f6';
             ctx.fill();
-            ctx.strokeStyle = '#1e40af'; // Darker blue border
+            ctx.strokeStyle = '#1e40af';
             ctx.lineWidth = 2;
             ctx.stroke();
         }
 
-        // Draw initial triangle on page load
-        drawTriangle();
+        // --- Event Listeners ---
 
-        // Add event listener to the button
+         // Initial UI setup based on checkbox default (unchecked = single mode initially based on HTML)
+        inputModeToggle.checked = false; // Start in Single Input mode
+        updateInputModeUI(); // Set initial visibility
+
+        // Listener for the toggle switch
+        inputModeToggle.addEventListener('change', updateInputModeUI);
+
+        // Listener for the draw button
         drawButton.addEventListener('click', drawTriangle);
 
         // Add keypress event listeners to input fields for the Enter key
         adjacentRatioInput.addEventListener('keyup', function(event) {
             if (event.key === 'Enter') {
-                event.preventDefault(); // Prevent default form submission
+                event.preventDefault();
                 drawTriangle();
             }
         });
 
         oppositeRatioInput.addEventListener('keyup', function(event) {
             if (event.key === 'Enter') {
-                event.preventDefault(); // Prevent default form submission
+                event.preventDefault();
+                drawTriangle();
+            }
+        });
+
+         combinedRatioInput.addEventListener('keyup', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
                 drawTriangle();
             }
         });
 
 
-        // Redraw on window resize to maintain responsiveness
+        // Redraw on window resize
         window.addEventListener('resize', () => {
-             // Update canvas size if needed (optional, but good for responsiveness)
-             // canvas.width = canvas.parentElement.clientWidth;
-             // canvas.height = canvas.parentElement.clientHeight * 0.8; // Adjust height as needed
-             drawTriangle(); // Redraw the triangle
+             // Consider recalculating canvas size based on parent if needed
+             // canvas.width = canvas.parentElement.clientWidth * 0.9; // Example
+             // canvas.height = 400; // Example fixed height or calculate aspect ratio
+            drawTriangle();
         });
+
+        // Draw initial triangle on page load using default values from the initially visible input
+        // drawTriangle(); // Called by updateInputModeUI initially
 
     </script>
 
