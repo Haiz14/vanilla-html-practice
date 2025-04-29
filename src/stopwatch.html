@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Stopwatch</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Optional: Style for the scrollbar if needed */
+        .flags-container::-webkit-scrollbar {
+            width: 5px;
+        }
+        .flags-container::-webkit-scrollbar-track {
+            background: #f1f1f1; /* Light track */
+            /* dark:background: #2d3748; Dark track - if needed, requires JS toggle or media query */
+        }
+        .flags-container::-webkit-scrollbar-thumb {
+            background: #888; /* Light thumb */
+             /* dark:background: #4a5568; Dark thumb - if needed */
+            border-radius: 5px;
+        }
+        .flags-container::-webkit-scrollbar-thumb:hover {
+            background: #555; /* Light thumb hover */
+            /* dark:background: #718096; Dark thumb hover - if needed */
+        }
+        /* Ensure consistent width for the timer's ms part */
+        #timerDisplay .ms-digits {
+            display: inline-block; /* Helps stabilize layout */
+            min-width: 4ch; /* Adjust if needed based on font */
+            text-align: left;
+        }
+        /* Minor style tweak for header alignment */
+        thead th {
+             white-space: nowrap;
+        }
+    </style>
+    <script>
+        // If you want basic OS-level dark mode detection:
+        // if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        //   document.documentElement.classList.add('dark')
+        // } else {
+        //   document.documentElement.classList.remove('dark')
+        // }
+        // You can also add a button to toggle localStorage.theme between 'light' and 'dark'
+    </script>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+
+    <div class="h-screen flex flex-col">
+
+        <div class="text-center py-8 md:py-12">
+            <span id="timerDisplay" class="text-6xl md:text-7xl font-mono text-gray-800 dark:text-gray-200">
+                00:00:00.<span class="text-4xl md:text-5xl ms-digits">000</span>
+            </span>
+        </div>
+
+        <div class="flex-grow overflow-y-auto px-4 pb-8 flags-container">
+            <table class="w-full text-sm text-left text-gray-600 dark:text-gray-400">
+                <thead class="text-xs text-gray-700 dark:text-gray-300 uppercase bg-gray-200 dark:bg-gray-700 sticky top-0 z-10">
+                    <tr>
+                        <th scope="col" class="px-3 py-3 rounded-tl-lg">
+                            Flag #
+                        </th>
+                        <th scope="col" class="px-3 py-3">
+                            Time
+                        </th>
+                        <th scope="col" class="px-3 py-3 rounded-tr-lg">
+                            Split
+                        </th>
+                    </tr>
+                </thead>
+                <tbody id="flagsTableBody">
+                </tbody>
+            </table>
+             <p id="flagsPlaceholder" class="text-center text-gray-400 dark:text-gray-500 italic mt-6">No flags recorded yet.</p>
+        </div>
+
+        <div class="flex w-full sticky bottom-0 bg-gray-100 dark:bg-gray-800 shadow-inner pt-1"> 
+            <button id="startPauseButton" class="flex-1 py-10 text-xl font-semibold text-white bg-blue-500 hover:bg-blue-600 focus:outline-none transition duration-150 ease-in-out">
+                Start
+            </button>
+            <button id="resetButton" class="flex-1 py-16 text-xl font-semibold text-white bg-red-500 hover:bg-red-600 focus:outline-none transition duration-150 ease-in-out" disabled>
+                Reset
+            </button>
+            <button id="flagButton" class="flex-1 py-16 text-xl font-semibold text-white bg-green-500 hover:bg-green-600 focus:outline-none transition duration-150 ease-in-out" disabled>
+                Flag
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        const timerDisplay = document.getElementById('timerDisplay');
+        const startPauseButton = document.getElementById('startPauseButton');
+        const flagButton = document.getElementById('flagButton');
+        const resetButton = document.getElementById('resetButton');
+        const flagsTableBody = document.getElementById('flagsTableBody');
+        const flagsPlaceholder = document.getElementById('flagsPlaceholder');
+
+        let startTime = 0;
+        let elapsedTime = 0;
+        let timerInterval;
+        let running = false;
+        let flagCounter = 0;
+        let lastFlagTime = 0; // *** ADDED: To store time of the last flag ***
+
+        function formatTime(milliseconds, isSplit = false) {
+            if (milliseconds < 0) milliseconds = 0; // Avoid negative times if calculation glitches
+            const totalSeconds = Math.floor(milliseconds / 1000);
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+            const ms = Math.floor((milliseconds % 1000));
+
+            const formattedMs = ms.toString().padStart(3, '0');
+            // Show '+' for split times if needed (optional)
+            // const prefix = isSplit ? '+' : '';
+            const mainTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+            // Use specific class for ms digits for potential styling/sizing
+            return `${mainTime}.<span class="text-4xl md:text-5xl ms-digits">${formattedMs}</span>`;
+        }
+
+
+         function formatTimeForTableWithoutHours(milliseconds) {
+            if (milliseconds < 0) milliseconds = 0;
+            const totalSeconds = Math.floor(milliseconds / 1000);
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+            const ms = Math.floor((milliseconds % 1000));
+
+            const formattedMs = ms.toString().padStart(3, '0');
+            const mainTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+            // Return simpler format for table cells, maybe smaller ms
+            return `${mainTime}.<span class="text-xs">${formattedMs}</span>`;
+        }
+         function formatTimeForTable(milliseconds) {
+            if (milliseconds < 0) milliseconds = 0;
+            const totalSeconds = Math.floor(milliseconds / 1000);
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+            const ms = Math.floor((milliseconds % 1000));
+
+            const formattedMs = ms.toString().padStart(3, '0');
+            const mainTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+            // Return simpler format for table cells, maybe smaller ms
+            return `${mainTime}.<span class="text-xs">${formattedMs}</span>`;
+        }
+
+
+        function updateTimer() {
+            const currentTime = Date.now();
+            // Ensure startTime is not 0 before calculating, prevents NaN on initial load briefly
+            const totalElapsedTime = elapsedTime + (running ? (currentTime - startTime) : 0);
+            timerDisplay.innerHTML = formatTime(totalElapsedTime);
+        }
+
+        function startPause() {
+            if (running) {
+                // Pause
+                clearInterval(timerInterval);
+                 // Calculate elapsed time accurately *before* setting running to false
+                elapsedTime += Date.now() - startTime;
+                running = false;
+                startPauseButton.textContent = 'Resume';
+                startPauseButton.classList.remove('bg-blue-500', 'hover:bg-blue-600');
+                startPauseButton.classList.add('bg-yellow-500', 'hover:bg-yellow-600');
+                flagButton.disabled = true;
+                flagButton.classList.add('opacity-50', 'cursor-not-allowed');
+
+            } else {
+                // Start or Resume
+                // If resuming, elapsedTime already holds the paused time.
+                // If starting fresh, elapsedTime is 0.
+                startTime = Date.now(); // Set new start time reference
+                timerInterval = setInterval(updateTimer, 30); // Update display frequently
+                running = true;
+                startPauseButton.textContent = 'Pause';
+                startPauseButton.classList.remove('bg-yellow-500', 'hover:bg-yellow-600');
+                startPauseButton.classList.add('bg-blue-500', 'hover:bg-blue-600');
+                flagButton.disabled = false;
+                resetButton.disabled = false;
+                flagButton.classList.remove('opacity-50', 'cursor-not-allowed');
+                resetButton.classList.remove('opacity-50', 'cursor-not-allowed');
+                 if (flagsTableBody.children.length === 0) {
+                   flagsPlaceholder.style.display = 'none';
+                }
+            }
+        }
+
+        function reset() {
+            clearInterval(timerInterval);
+            running = false;
+            elapsedTime = 0;
+            startTime = 0;
+            flagCounter = 0;
+            lastFlagTime = 0; // *** ADDED: Reset last flag time ***
+            timerDisplay.innerHTML = '00:00:00.<span class="text-4xl md:text-5xl ms-digits">000</span>';
+            startPauseButton.textContent = 'Start';
+            startPauseButton.classList.remove('bg-yellow-500', 'hover:bg-yellow-600');
+            startPauseButton.classList.add('bg-blue-500', 'hover:bg-blue-600');
+            flagsTableBody.innerHTML = ''; // Clear table content
+            flagButton.disabled = true;
+            resetButton.disabled = true;
+            flagButton.classList.add('opacity-50', 'cursor-not-allowed');
+            resetButton.classList.add('opacity-50', 'cursor-not-allowed');
+            flagsPlaceholder.style.display = 'block'; // Show placeholder
+        }
+
+        function flag() {
+            if (!running) return; // Don't flag if not running
+
+            const currentTime = Date.now();
+            const currentTotalFlagTime = elapsedTime + (currentTime - startTime);
+            // *** ADDED: Calculate difference from last flag ***
+            const timeDifference = currentTotalFlagTime - lastFlagTime;
+
+            flagCounter++;
+
+            flagsPlaceholder.style.display = 'none'; // Ensure placeholder is hidden
+
+            const tr = document.createElement('tr');
+            // Alternating row colors slightly improve readability in long lists
+            tr.classList.add(flagCounter % 2 === 0 ? 'bg-gray-50' : 'bg-white', 'dark:bg-gray-800', 'dark:border-gray-700', 'border-b', 'hover:bg-gray-100', 'dark:hover:bg-gray-600');
+
+
+            const tdNum = document.createElement('td');
+            tdNum.classList.add('px-6', 'py-3', 'font-medium', 'text-gray-900', 'dark:text-white');
+            tdNum.textContent = flagCounter;
+
+            const tdTime = document.createElement('td');
+            tdTime.classList.add('px-6', 'py-3', 'font-mono');
+            // Use specific table formatter if desired
+            tdTime.innerHTML = formatTimeForTableWithoutHours(currentTotalFlagTime);
+
+            // *** ADDED: Create and populate the Split Time cell ***
+            const tdDiff = document.createElement('td');
+            tdDiff.classList.add('px-3', 'py-3', 'font-mono');
+            tdDiff.innerHTML = formatTimeForTableWithoutHours(timeDifference); // Format the difference
+
+            tr.appendChild(tdNum);
+            tr.appendChild(tdTime);
+            tr.appendChild(tdDiff); // Append the new cell
+
+            flagsTableBody.prepend(tr); // Insert row at the beginning
+
+            // *** ADDED: Update lastFlagTime for the next split calculation ***
+            lastFlagTime = currentTotalFlagTime;
+        }
+
+        // Add Event Listeners
+        startPauseButton.addEventListener('click', startPause);
+        resetButton.addEventListener('click', reset);
+        flagButton.addEventListener('click', flag);
+
+        // Initial setup on load
+        flagButton.disabled = true;
+        resetButton.disabled = true;
+        flagButton.classList.add('opacity-50', 'cursor-not-allowed');
+        resetButton.classList.add('opacity-50', 'cursor-not-allowed');
+         if (flagsTableBody.children.length === 0) {
+            flagsPlaceholder.style.display = 'block';
+         } else {
+              flagsPlaceholder.style.display = 'none';
+         }
+         // Update timer display initially to show 000
+         updateTimer();
+
+    </script>
+
+</body>
+</html>
