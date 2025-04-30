@@ -111,84 +111,154 @@
       ></div>
 
       <!-- Controls at top -->
-      <div class="absolute top-4 left-4 right-4 z-20 max-w-md mx-auto">
-        <div
-          class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-xl shadow-lg p-3 border border-gray-200 dark:border-gray-700"
+      <div class="absolute top-4 left-4 z-20 flex items-center gap-2">
+        <!-- Settings Cog Icon with Status Indicators -->
+        <button
+          @click="showControlPanel = !showControlPanel"
+          class="relative p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+          aria-label="Settings"
         >
-          <!-- Top Row: Interval & Quick Flag -->
-          <div
-            class="flex justify-between items-center pb-2 border-b border-gray-200 dark:border-gray-700"
+          <!-- Cog Icon -->
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5 text-gray-600 dark:text-gray-300"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
           >
-            <!-- Interval Controls -->
-            <div class="flex items-center gap-2">
-              <button
-                @click="decreaseInterval"
-                class="w-8 h-8 flex items-center justify-center text-gray-700 dark:text-gray-300 font-bold rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition"
-              >
-                -
-              </button>
-              <button
-                @click="resetInterval"
-                class="px-3 h-8 flex items-center justify-center text-gray-700 dark:text-gray-300 font-medium text-sm rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition"
-              >
-                Reset
-              </button>
-            </div>
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+            />
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+            />
+          </svg>
 
-            <!-- Interval Display -->
-            <span
-              @click="showIntervalModal"
-              class="text-sm font-medium cursor-pointer px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-lg"
-              x-text="interval > 0 ? interval + 's' : '0s'"
-            >
-              <!-- Changed from 'Manual' to '0s' -->
-            </span>
+          <!-- Quick Flag Indicator (Blue) -->
+          <div
+            x-show="quickFlagEnabled"
+            class="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-blue-500 border border-white dark:border-gray-800"
+          ></div>
 
-            <!-- Quick Flag Toggle -->
-            <div class="flex items-center gap-2">
-              <label class="switch">
-                <input type="checkbox" x-model="quickFlagEnabled" />
-                <span class="slider"></span>
-              </label>
-              <span class="text-xs font-medium">Quick Flag</span>
-            </div>
-          </div>
+          <!-- No Sleep Indicator (Orange) -->
+          <div
+            x-show="noSleepEnabled"
+            class="absolute -bottom-1 -right-1 w-2 h-2 rounded-full bg-orange-500 border border-white dark:border-gray-800"
+          ></div>
+        </button>
 
-          <!-- Bottom Row: Increment Buttons & No Sleep -->
-          <div class="flex justify-between items-center pt-2">
-            <!-- Increment Buttons -->
-            <div class="flex gap-2">
-              <button
-                @click="increaseInterval(1)"
-                class="px-3 h-8 flex items-center justify-center text-gray-700 dark:text-gray-300 font-medium text-sm rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition"
-              >
-                +1s
-              </button>
-              <button
-                @click="increaseInterval(5)"
-                class="px-3 h-8 flex items-center justify-center text-gray-700 dark:text-gray-300 font-medium text-sm rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition"
-              >
-                +5s
-              </button>
-              <button
-                @click="increaseInterval(25)"
-                class="px-3 h-8 flex items-center justify-center text-gray-700 dark:text-gray-300 font-medium text-sm rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition"
-              >
-                +25s
-              </button>
-            </div>
+        <!-- Current Interval Display -->
+        <span
+          @click="showControlPanel = true"
+          class="text-sm font-medium cursor-pointer px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded-lg"
+          x-text="interval > 0 ? interval + 's' : '0s'"
+        ></span>
+      </div>
 
-            <!-- No Sleep Toggle -->
-            <div class="flex items-center gap-2">
-              <label class="switch">
-                <input type="checkbox" @click="toggleNoSleep"/>
-                <span class="slider"></span>
-              </label>
-              <span class="text-xs font-medium">No Sleep</span>
-            </div>
-          </div>
+      <!-- Control Panel Modal -->
+      <div
+  x-show="showControlPanel"
+  @click.away="showControlPanel = false"
+  class="fixed inset-0 z-30 flex items-start justify-center pt-16"
+  x-transition:enter="transition ease-out duration-200"
+  x-transition:enter-start="opacity-0 translate-y-4"
+  x-transition:enter-end="opacity-100 translate-y-0"
+  x-transition:leave="transition ease-in duration-150"
+  x-transition:leave-start="opacity-100 translate-y-0"
+  x-transition:leave-end="opacity-0 translate-y-4"
+>
+  <div class="relative w-full max-w-md mx-4">
+    <div class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-md rounded-xl shadow-xl p-3 border border-gray-200 dark:border-gray-700">
+      <!-- Original Control Panel Content -->
+      <!-- Top Row: Interval & Quick Flag -->
+      <div class="flex justify-between items-center pb-2 border-b border-gray-200 dark:border-gray-700">
+        <!-- Interval Controls -->
+        <div class="flex items-center gap-2">
+          <button
+            @click="decreaseInterval"
+            class="w-8 h-8 flex items-center justify-center text-gray-700 dark:text-gray-300 font-bold rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+          >
+            -
+          </button>
+          <button
+            @click="resetInterval"
+            class="px-3 h-8 flex items-center justify-center text-gray-700 dark:text-gray-300 font-medium text-sm rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+          >
+            Reset
+          </button>
+        </div>
+
+        <!-- Interval Display -->
+        <span
+          @click="showIntervalModal"
+          class="text-sm font-medium cursor-pointer px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-lg"
+          x-text="interval > 0 ? interval + 's' : '0s'"
+        ></span>
+
+        <!-- Quick Flag Toggle -->
+        <div class="flex items-center gap-2">
+          <label class="switch">
+            <input type="checkbox" x-model="quickFlagEnabled" />
+            <span class="slider"></span>
+          </label>
+          <span class="text-xs font-medium">Quick Flag</span>
         </div>
       </div>
+
+      <!-- Bottom Row: Increment Buttons & No Sleep -->
+      <div class="flex justify-between items-center pt-2 mb-3">
+        <!-- Increment Buttons -->
+        <div class="flex gap-2">
+          <button
+            @click="increaseInterval(1)"
+            class="px-3 h-8 flex items-center justify-center text-gray-700 dark:text-gray-300 font-medium text-sm rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+          >
+            +1s
+          </button>
+          <button
+            @click="increaseInterval(5)"
+            class="px-3 h-8 flex items-center justify-center text-gray-700 dark:text-gray-300 font-medium text-sm rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+          >
+            +5s
+          </button>
+          <button
+            @click="increaseInterval(25)"
+            class="px-3 h-8 flex items-center justify-center text-gray-700 dark:text-gray-300 font-medium text-sm rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+          >
+            +25s
+          </button>
+        </div>
+
+        <!-- No Sleep Toggle -->
+        <div class="flex items-center gap-2">
+          <label class="switch">
+            <input type="checkbox" x-model="noSleepEnabled" @click="toggleNoSleep"/>
+            <span class="slider"></span>
+          </label>
+          <span class="text-xs font-medium">No Sleep</span>
+        </div>
+      </div>
+
+      <!-- New Red Close Button at Bottom -->
+      <button
+        @click="showControlPanel = false"
+        class="w-full py-2 bg-red-500 hover:bg-red-600 text-white font-medium rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+        Close Panel
+      </button>
+    </div>
+  </div>
+</div>
+      
 
       <!-- Interval modal -->
       <div
@@ -364,6 +434,7 @@
           quickFlagEnabled: false,
           flags: [],
           noSleepEnabled: false,
+          showControlPanel: false,
           noSleep: null,
           formattedTime:
             '00:00:00.<span class="text-4xl md:text-5xl ms-digits">000</span>',
@@ -652,13 +723,11 @@
               console.error("Failed to enable no sleep:", e);
               this.noSleepEnabled = false;
             });
-
-            },
+          },
 
           disableNoSleep() {
             // Disable wake lock
             this.noSleep.disable();
-
           },
 
           // Clean up when component is removed
