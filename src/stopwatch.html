@@ -33,6 +33,56 @@
         thead th {
              white-space: nowrap;
         }
+        /* Quick flag zone */
+        .quick-flag-zone {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 50%;
+            height: 100%;
+            z-index: 10;
+            display: none; /* Hidden by default */
+        }
+        /* Toggle switch styles */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #10b981;
+        }
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
     </style>
     <script>
         // If you want basic OS-level dark mode detection:
@@ -47,6 +97,17 @@
 <body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
 
     <div class="h-screen flex flex-col">
+        <!-- Quick flag zone (clickable area) -->
+        <div id="quickFlagZone" class="quick-flag-zone"></div>
+        
+        <!-- Mode switcher toggle -->
+        <div class="absolute top-4 right-4 flex items-center space-x-2 z-20 bg-gray-200/20 dark:bg-gray-700/20 px-3 py-2 rounded-full shadow-md">
+            <span class="text-xs font-medium">Quick Flag</span>
+            <label class="switch">
+                <input type="checkbox" id="quickFlagToggle">
+                <span class="slider"></span>
+            </label>
+        </div>
 
         <div class="text-center py-8 md:py-12">
             <span id="timerDisplay" class="text-6xl md:text-7xl font-mono text-gray-800 dark:text-gray-200">
@@ -96,6 +157,8 @@
         const resetButton = document.getElementById('resetButton');
         const flagsTableBody = document.getElementById('flagsTableBody');
         const flagsPlaceholder = document.getElementById('flagsPlaceholder');
+        const quickFlagZone = document.getElementById('quickFlagZone');
+        const quickFlagToggle = document.getElementById('quickFlagToggle');
 
         let startTime = 0;
         let elapsedTime = 0;
@@ -103,6 +166,7 @@
         let running = false;
         let flagCounter = 0;
         let lastFlagTime = 0; // *** ADDED: To store time of the last flag ***
+        let quickFlagEnabled = false; // Track if quick flag mode is enabled
 
         function formatTime(milliseconds, isSplit = false) {
             if (milliseconds < 0) milliseconds = 0; // Avoid negative times if calculation glitches
@@ -121,8 +185,7 @@
             return `${mainTime}.<span class="text-4xl md:text-5xl ms-digits">${formattedMs}</span>`;
         }
 
-
-         function formatTimeForTableWithoutHours(milliseconds) {
+        function formatTimeForTableWithoutHours(milliseconds) {
             if (milliseconds < 0) milliseconds = 0;
             const totalSeconds = Math.floor(milliseconds / 1000);
             const hours = Math.floor(totalSeconds / 3600);
@@ -136,7 +199,8 @@
             // Return simpler format for table cells, maybe smaller ms
             return `${mainTime}.<span class="text-xs">${formattedMs}</span>`;
         }
-         function formatTimeForTable(milliseconds) {
+
+        function formatTimeForTable(milliseconds) {
             if (milliseconds < 0) milliseconds = 0;
             const totalSeconds = Math.floor(milliseconds / 1000);
             const hours = Math.floor(totalSeconds / 3600);
@@ -150,7 +214,6 @@
             // Return simpler format for table cells, maybe smaller ms
             return `${mainTime}.<span class="text-xs">${formattedMs}</span>`;
         }
-
 
         function updateTimer() {
             const currentTime = Date.now();
@@ -171,6 +234,11 @@
                 startPauseButton.classList.add('bg-yellow-500', 'hover:bg-yellow-600');
                 flagButton.disabled = true;
                 flagButton.classList.add('opacity-50', 'cursor-not-allowed');
+                
+                // Disable quick flag when paused
+                if (quickFlagEnabled) {
+                    quickFlagZone.style.display = 'none';
+                }
 
             } else {
                 // Start or Resume
@@ -186,7 +254,13 @@
                 resetButton.disabled = false;
                 flagButton.classList.remove('opacity-50', 'cursor-not-allowed');
                 resetButton.classList.remove('opacity-50', 'cursor-not-allowed');
-                 if (flagsTableBody.children.length === 0) {
+                
+                // Re-enable quick flag zone if the mode is active
+                if (quickFlagEnabled) {
+                    quickFlagZone.style.display = 'block';
+                }
+                
+                if (flagsTableBody.children.length === 0) {
                    flagsPlaceholder.style.display = 'none';
                 }
             }
@@ -209,6 +283,9 @@
             flagButton.classList.add('opacity-50', 'cursor-not-allowed');
             resetButton.classList.add('opacity-50', 'cursor-not-allowed');
             flagsPlaceholder.style.display = 'block'; // Show placeholder
+            
+            // Hide quick flag zone when reset
+            quickFlagZone.style.display = 'none';
         }
 
         function flag() {
@@ -226,7 +303,6 @@
             const tr = document.createElement('tr');
             // Alternating row colors slightly improve readability in long lists
             tr.classList.add(flagCounter % 2 === 0 ? 'bg-gray-50' : 'bg-white', 'dark:bg-gray-800', 'dark:border-gray-700', 'border-b', 'hover:bg-gray-100', 'dark:hover:bg-gray-600');
-
 
             const tdNum = document.createElement('td');
             tdNum.classList.add('px-6', 'py-3', 'font-medium', 'text-gray-900', 'dark:text-white');
@@ -250,26 +326,80 @@
 
             // *** ADDED: Update lastFlagTime for the next split calculation ***
             lastFlagTime = currentTotalFlagTime;
+            
+            // Optional: Add visual feedback for quick flag
+            if (quickFlagEnabled) {
+                // Create a temporary ripple effect where clicked
+                const ripple = document.createElement('div');
+                ripple.classList.add('absolute', 'bg-green-400', 'opacity-50', 'rounded-full');
+                ripple.style.width = '60px';
+                ripple.style.height = '60px';
+                ripple.style.left = (event.clientX - 30) + 'px';
+                ripple.style.top = (event.clientY - 30) + 'px';
+                ripple.style.animation = 'ripple 0.6s linear';
+                document.body.appendChild(ripple);
+                
+                setTimeout(() => {
+                    document.body.removeChild(ripple);
+                }, 600);
+            }
+        }
+
+        // Toggle Quick Flag Mode
+        function toggleQuickFlag() {
+            quickFlagEnabled = quickFlagToggle.checked;
+            
+            if (quickFlagEnabled && running) {
+                quickFlagZone.style.display = 'block';
+            } else {
+                quickFlagZone.style.display = 'none';
+            }
         }
 
         // Add Event Listeners
         startPauseButton.addEventListener('click', startPause);
         resetButton.addEventListener('click', reset);
         flagButton.addEventListener('click', flag);
+        quickFlagToggle.addEventListener('change', toggleQuickFlag);
+        
+        // Event listener for the quick flag zone
+        quickFlagZone.addEventListener('click', function(event) {
+            // Only trigger if enabled and timer is running
+            if (quickFlagEnabled && running) {
+                flag();
+                event.preventDefault();
+                event.stopPropagation();
+            }
+        });
+
+        // Add ripple animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes ripple {
+                0% {
+                    transform: scale(0.5);
+                    opacity: 0.5;
+                }
+                100% {
+                    transform: scale(2);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
 
         // Initial setup on load
         flagButton.disabled = true;
         resetButton.disabled = true;
         flagButton.classList.add('opacity-50', 'cursor-not-allowed');
         resetButton.classList.add('opacity-50', 'cursor-not-allowed');
-         if (flagsTableBody.children.length === 0) {
+        if (flagsTableBody.children.length === 0) {
             flagsPlaceholder.style.display = 'block';
-         } else {
-              flagsPlaceholder.style.display = 'none';
-         }
-         // Update timer display initially to show 000
-         updateTimer();
-
+        } else {
+            flagsPlaceholder.style.display = 'none';
+        }
+        // Update timer display initially to show 000
+        updateTimer();
     </script>
 
 </body>
