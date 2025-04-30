@@ -572,8 +572,8 @@
               this.intervalTimer = setInterval(() => {
                 // this.flag();
                   this.playBeep([
-                      { waveform: "square", frequency: 392, duration: 0.15, volume: 0.6 }, // G4
-  { waveform: "square", frequency: 349.23, duration: 0.15, volume: 0.6 }, // F4
+                      { waveform: "square", frequency: 392, duration: 0.15, volume: 0.4 }, // G4
+  { waveform: "sine", frequency: 349.23, duration: 0.15, volume: 0.4 }, // F4
                   ]);
   
                 if (this.vibrationSupported) {
