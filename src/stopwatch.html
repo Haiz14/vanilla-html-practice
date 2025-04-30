@@ -154,7 +154,6 @@
             title="Quick Flag"
           ></div>
 
-
           <!-- No Sleep Indicator -->
           <div
             class="w-3 h-3 rounded-sm border border-white dark:border-gray-800 transition-all"
@@ -487,355 +486,359 @@
     </div>
 
     <script>
-        document.addEventListener("alpine:init", () => {
-          Alpine.data("stopwatch", () => ({
-            startTime: 0,
-            elapsedTime: 0,
-            timerInterval: null,
-            running: false,
-            flagCounter: 0,
-            lastFlagTime: 0,
-            quickFlagEnabled: false,
-            flagOnInterval: true,
-            flags: [],
-            noSleepEnabled: false,
-            showControlPanel: false,
-            noSleep: null,
-            formattedTime:
-              '00:00:00.<span class="text-4xl md:text-5xl ms-digits">000</span>',
-            interval: 0,
-            intervalTimer: null,
-            showModal: false,
-            showErrorModal: false,
-            newInterval: 0,
-            audioContext: null, // For Web Audio API
-            beepFrequency: 440, // Pitch of the beep (440Hz = A4 note)
+      document.addEventListener("alpine:init", () => {
+        Alpine.data("stopwatch", () => ({
+          startTime: 0,
+          elapsedTime: 0,
+          totalElapsedTime: 0,
+          timerInterval: null,
+          running: false,
+          flagCounter: 0,
+          lastFlagTime: 0,
+          quickFlagEnabled: false,
+          flagOnInterval: true,
+          flags: [],
+          noSleepEnabled: false,
+          showControlPanel: false,
+          noSleep: null,
+          formattedTime:
+            '00:00:00.<span class="text-xl md:text-xl ms-digits">000</span>',
+          interval: 0,
+          intervalTimer: null,
+          showModal: false,
+          showErrorModal: false,
+          newInterval: 0,
+          audioContext: null, // For Web Audio API
+          beepFrequency: 440, // Pitch of the beep (440Hz = A4 note)
 
-            init() {
-              // Initialize timer display
-              this.loadState();
-              this.updateTimer();
-              this.noSleep = new NoSleep();
+          init() {
+            // Initialize timer display
+            this.loadState();
+            this.updateTimer();
+            this.noSleep = new NoSleep();
 
-              // Check for vibration API support
-              this.vibrationSupported = "vibrate" in navigator;
+            // Check for vibration API support
+            this.vibrationSupported = "vibrate" in navigator;
 
-              // Save state when window closes
-              window.addEventListener("beforeunload", () => this.saveState());
+            // Save state when window closes
+            window.addEventListener("beforeunload", () => this.saveState());
 
-              // wont't save the time tjis timer was closed at, there's some trick to it.
-              //
-              // setInterval(() => this.saveState(), 30000);
-            },
+            // wont't save the time tjis timer was closed at, there's some trick to it.
+            //
+            setInterval(() => this.saveState(), 5000);
+          },
 
-            formatTime(milliseconds, isSplit = false) {
-              if (milliseconds < 0) milliseconds = 0;
-              const totalSeconds = Math.floor(milliseconds / 1000);
-              const hours = Math.floor(totalSeconds / 3600);
-              const minutes = Math.floor((totalSeconds % 3600) / 60);
-              const seconds = totalSeconds % 60;
-              const ms = Math.floor(milliseconds % 1000);
+          formatTime(milliseconds, isSplit = false) {
+            if (milliseconds < 0) milliseconds = 0;
+            const totalSeconds = Math.floor(milliseconds / 1000);
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+            const ms = Math.floor(milliseconds % 1000);
 
-              const formattedMs = ms.toString().padStart(3, "0");
-              const mainTime = `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+            const formattedMs = ms.toString().padStart(3, "0");
+            const mainTime = `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
 
-              return `${mainTime}.<span class="text-4xl md:text-5xl ms-digits">${formattedMs}</span>`;
-            },
+            return `${mainTime}.<span class="text-4xl md:text-5xl ms-digits">${formattedMs}</span>`;
+          },
 
-            saveState() {
-              const state = {
-                elapsedTime: this.elapsedTime,
-                running: this.running,
-                flagCounter: this.flagCounter,
-                lastFlagTime: this.lastFlagTime,
-                flags: this.flags,
-                quickFlagEnabled: this.quickFlagEnabled,
+          saveState() {
+            const state = {
+              elapsedTime: this.running
+                ? this.totalElapsedTime
+                : this.elapsedTime,
+              running: this.running,
+              flagCounter: this.flagCounter,
+              lastFlagTime: this.lastFlagTime,
+              flags: this.flags,
+              quickFlagEnabled: this.quickFlagEnabled,
 
-                flagOnInterval: this.flagOnInterval || false,
-                noSleepEnabled: this.noSleepEnabled,
-                interval: this.interval,
-                beepFrequency: this.beepFrequency,
-              };
+              flagOnInterval: this.flagOnInterval || false,
+              noSleepEnabled: this.noSleepEnabled,
+              interval: this.interval,
+              beepFrequency: this.beepFrequency,
+            };
 
-              try {
-                localStorage.setItem("stopwatchState", JSON.stringify(state));
-              } catch (e) {
-                console.warn("Failed to save state to localStorage:", e);
-              }
-            },
+            try {
+              localStorage.setItem("stopwatchState", JSON.stringify(state));
+            } catch (e) {
+              console.warn("Failed to save state to localStorage:", e);
+            }
+          },
 
-            // Load state from localStorage
-            loadState() {
-              try {
-                const saved = localStorage.getItem("stopwatchState");
-                if (saved) {
-                  const state = JSON.parse(saved);
+          // Load state from localStorage
+          loadState() {
+            try {
+              const saved = localStorage.getItem("stopwatchState");
+              if (saved) {
+                const state = JSON.parse(saved);
 
-                  // Restore simple values
-                  this.elapsedTime = state.elapsedTime || 0;
-                  this.flagCounter = state.flagCounter || 0;
-                  this.lastFlagTime = state.lastFlagTime || 0;
-                  this.quickFlagEnabled = state.quickFlagEnabled || false;
-                  this.flagOnInterval = state.flagOnInterval || false;
-                  // This needs user to click a button to ne enabled
-                  // this.noSleepEnabled = state.noSleepEnabled || false;
-                  this.interval = state.interval || 0;
-                  this.beepFrequency = state.beepFrequency || 440;
+                // Restore simple values
+                this.elapsedTime = state.elapsedTime || 0;
+                this.flagCounter = state.flagCounter || 0;
+                this.lastFlagTime = state.lastFlagTime || 0;
+                this.quickFlagEnabled = state.quickFlagEnabled || false;
+                this.flagOnInterval = state.flagOnInterval || false;
+                // This needs user to click a button to ne enabled
+                // this.noSleepEnabled = state.noSleepEnabled || false;
+                this.interval = state.interval || 0;
+                this.beepFrequency = state.beepFrequency || 440;
 
-                  // Restore flags array with validation
-                  this.flags = Array.isArray(state.flags) ? state.flags : [];
+                // Restore flags array with validation
+                this.flags = Array.isArray(state.flags) ? state.flags : [];
 
-                  // Handle running state carefully
-                  if (state.running) {
-                    this.running = false; // Start paused by default for safety
-                    this.startPause(); // Let user manually resume
-                  }
-
-                  // Update display
-                  this.formattedTime = this.formatTime(this.elapsedTime);
+                // Handle running state carefully
+                if (state.running) {
+                  this.running = false; // Start paused by default for safety
+                  this.startPause(); // Let user manually resume
                 }
-              } catch (e) {
-                console.warn("Failed to load state from localStorage:", e);
-              }
-            },
 
-            formatTimeForTableWithoutHours(milliseconds) {
-              if (milliseconds < 0) milliseconds = 0;
-              const totalSeconds = Math.floor(milliseconds / 1000);
-              const minutes = Math.floor((totalSeconds % 3600) / 60);
-              const seconds = totalSeconds % 60;
-              const ms = Math.floor(milliseconds % 1000);
-
-              const formattedMs = ms.toString().padStart(3, "0");
-              const mainTime = `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
-
-              return `${mainTime}.<span class="text-xs">${formattedMs}</span>`;
-            },
-
-            updateTimer() {
-              if (this.running) {
-                const currentTime = Date.now();
-                const totalElapsedTime =
-                  this.elapsedTime + (currentTime - this.startTime);
-                this.formattedTime = this.formatTime(totalElapsedTime);
-              } else {
+                // Update display
                 this.formattedTime = this.formatTime(this.elapsedTime);
               }
+            } catch (e) {
+              console.warn("Failed to load state from localStorage:", e);
+            }
+          },
 
-              // Set up the next update
-              if (this.running) {
-                requestAnimationFrame(this.updateTimer.bind(this));
-              }
-            },
+          formatTimeForTableWithoutHours(milliseconds) {
+            if (milliseconds < 0) milliseconds = 0;
+            const totalSeconds = Math.floor(milliseconds / 1000);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+            const ms = Math.floor(milliseconds % 1000);
 
-            startPause() {
-              if (this.running) {
-                // Pause timer
-                this.elapsedTime += Date.now() - this.startTime;
-                this.running = false;
-                cancelAnimationFrame(this.timerInterval);
-                this.clearIntervalTimer();
-              } else {
-                // Start or resume timer
-                this.startTime = Date.now();
-                this.running = true;
-                requestAnimationFrame(this.updateTimer.bind(this));
-                this.startIntervalTimer();
-              }
-              this.saveState()
-            },
+            const formattedMs = ms.toString().padStart(3, "0");
+            const mainTime = `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
 
-            reset() {
+            return `${mainTime}.<span class="text-xs">${formattedMs}</span>`;
+          },
+
+          updateTimer() {
+            if (this.running) {
+              const currentTime = Date.now();
+              const totalElapsedTime =
+                this.elapsedTime + (currentTime - this.startTime);
+              this.formattedTime = this.formatTime(totalElapsedTime);
+              this.totalElapsedTime = totalElapsedTime;
+            } else {
+              this.formattedTime = this.formatTime(this.elapsedTime);
+            }
+
+            // Set up the next update
+            if (this.running) {
+              requestAnimationFrame(this.updateTimer.bind(this));
+            }
+          },
+
+          startPause() {
+            if (this.running) {
+              // Pause timer
+              this.elapsedTime += Date.now() - this.startTime;
+              this.running = false;
               cancelAnimationFrame(this.timerInterval);
               this.clearIntervalTimer();
-              this.running = false;
-              this.elapsedTime = 0;
-              this.startTime = 0;
-              this.flagCounter = 0;
-              this.lastFlagTime = 0;
-              this.flags = [];
-              this.formattedTime =
-                '00:00:00.<span class="text-4xl md:text-5xl ms-digits">000</span>';
-              this.saveState()
-            },
+            } else {
+              // Start or resume timer
+              this.startTime = Date.now();
+              this.running = true;
+              requestAnimationFrame(this.updateTimer.bind(this));
+              this.startIntervalTimer();
+            }
+          },
 
-            playBeep(configs = [{}]) {
-              try {
-                // Lazy initialize audio context
-                if (!this.audioContext) {
-                  this.audioContext = new (window.AudioContext ||
-                    window.webkitAudioContext)();
-                }
+          reset() {
+            cancelAnimationFrame(this.timerInterval);
+            this.clearIntervalTimer();
+            this.running = false;
+            this.elapsedTime = 0;
+            this.startTime = 0;
+            this.flagCounter = 0;
+            this.lastFlagTime = 0;
+            this.flags = [];
+            this.formattedTime =
+              '00:00:00.<span class="text-4xl md:text-5xl ms-digits">000</span>';
+            this.saveState();
+          },
 
-                const now = this.audioContext.currentTime;
-                let currentTime = now;
-
-                // Process each config object in the array
-                configs.forEach((config, index) => {
-                  const {
-                    duration = 0.5, // duration in seconds
-                    volume = 0.8, // volume (0.0-1.0)
-                    waveform = "sine", // waveform type
-                    frequency = this.beepFrequency, // frequency in Hz
-                    onEnded = null, // optional callback for last beep
-                  } = config;
-
-                  const oscillator = this.audioContext.createOscillator();
-                  const gainNode = this.audioContext.createGain();
-
-                  oscillator.type = waveform;
-                  oscillator.frequency.value = frequency;
-                  gainNode.gain.value = volume;
-
-                  oscillator.connect(gainNode);
-                  gainNode.connect(this.audioContext.destination);
-
-                  oscillator.start(currentTime);
-                  oscillator.stop(currentTime + duration);
-
-                  currentTime += duration;
-
-                  // Cleanup
-                  oscillator.onended = () => {
-                    oscillator.disconnect();
-                    gainNode.disconnect();
-                    if (index === configs.length - 1 && onEnded) onEnded();
-                  };
-                });
-              } catch (error) {
-                console.warn("Audio playback failed:", error);
-                if (this.vibrationSupported) navigator.vibrate(200);
+          playBeep(configs = [{}]) {
+            // needs user to press at least one button before anything cam be played.
+            try {
+              // Lazy initialize audio context
+              if (!this.audioContext) {
+                this.audioContext = new (window.AudioContext ||
+                  window.webkitAudioContext)();
               }
-            },
-            flag() {
-              if (!this.running) return;
 
-              const currentTime = Date.now();
-              const currentTotalFlagTime =
-                this.elapsedTime + (currentTime - this.startTime);
-              const timeDifference = currentTotalFlagTime - this.lastFlagTime;
+              const now = this.audioContext.currentTime;
+              let currentTime = now;
 
-              this.flagCounter++;
+              // Process each config object in the array
+              configs.forEach((config, index) => {
+                const {
+                  duration = 0.5, // duration in seconds
+                  volume = 0.8, // volume (0.0-1.0)
+                  waveform = "sine", // waveform type
+                  frequency = this.beepFrequency, // frequency in Hz
+                  onEnded = null, // optional callback for last beep
+                } = config;
 
-              // Add flag to the beginning of the array (for reverse chronological display)
-              this.flags.unshift({
-                number: this.flagCounter,
-                totalTime: currentTotalFlagTime,
-                splitTime: timeDifference,
+                const oscillator = this.audioContext.createOscillator();
+                const gainNode = this.audioContext.createGain();
+
+                oscillator.type = waveform;
+                oscillator.frequency.value = frequency;
+                gainNode.gain.value = volume;
+
+                oscillator.connect(gainNode);
+                gainNode.connect(this.audioContext.destination);
+
+                oscillator.start(currentTime);
+                oscillator.stop(currentTime + duration);
+
+                currentTime += duration;
+
+                // Cleanup
+                oscillator.onended = () => {
+                  oscillator.disconnect();
+                  gainNode.disconnect();
+                  if (index === configs.length - 1 && onEnded) onEnded();
+                };
               });
+            } catch (error) {
+              console.warn("Audio playback failed:", error);
+              if (this.vibrationSupported) navigator.vibrate(200);
+            }
+          },
+          flag() {
+            if (!this.running) return;
 
-              // Update the last flag time
-              this.lastFlagTime = currentTotalFlagTime;
-              this.saveState();
-            },
+            const currentTime = Date.now();
+            const currentTotalFlagTime =
+              this.elapsedTime + (currentTime - this.startTime);
+            const timeDifference = currentTotalFlagTime - this.lastFlagTime;
 
-            quickFlag(event) {
-              if (this.quickFlagEnabled && this.running) {
-                this.flag();
+            this.flagCounter++;
 
-                // Create ripple effect
-                const ripple = document.createElement("div");
-                ripple.classList.add(
-                  "absolute",
-                  "bg-green-400",
-                  "opacity-50",
-                  "rounded-full",
-                );
-                ripple.style.width = "60px";
-                ripple.style.height = "60px";
-                ripple.style.left = event.clientX - 30 + "px";
-                ripple.style.top = event.clientY - 30 + "px";
-                ripple.style.animation = "ripple 0.6s linear";
-                document.body.appendChild(ripple);
+            // Add flag to the beginning of the array (for reverse chronological display)
+            this.flags.unshift({
+              number: this.flagCounter,
+              totalTime: currentTotalFlagTime,
+              splitTime: timeDifference,
+            });
 
-                setTimeout(() => {
-                  document.body.removeChild(ripple);
-                }, 600);
+            // Update the last flag time
+            this.lastFlagTime = currentTotalFlagTime;
+            this.saveState();
+          },
 
-                event.preventDefault();
-                event.stopPropagation();
-              }
-            },
+          quickFlag(event) {
+            if (this.quickFlagEnabled && this.running) {
+              this.flag();
 
-            // Interval methods
-            increaseInterval(no) {
-              this.newInterval = this.interval + no;
+              // Create ripple effect
+              const ripple = document.createElement("div");
+              ripple.classList.add(
+                "absolute",
+                "bg-green-400",
+                "opacity-50",
+                "rounded-full",
+              );
+              ripple.style.width = "60px";
+              ripple.style.height = "60px";
+              ripple.style.left = event.clientX - 30 + "px";
+              ripple.style.top = event.clientY - 30 + "px";
+              ripple.style.animation = "ripple 0.6s linear";
+              document.body.appendChild(ripple);
+
+              setTimeout(() => {
+                document.body.removeChild(ripple);
+              }, 600);
+
+              event.preventDefault();
+              event.stopPropagation();
+            }
+          },
+
+          // Interval methods
+          increaseInterval(no) {
+            this.newInterval = this.interval + no;
+            this.setIntervalValue();
+          },
+
+          resetInterval() {
+            if (this.interval > 0) {
+              this.newInterval = 0;
               this.setIntervalValue();
-            },
+            }
+          },
+          decreaseInterval() {
+            if (this.interval > 0) {
+              this.newInterval = this.interval - 1;
+              this.setIntervalValue();
+            }
+          },
 
-            resetInterval() {
-              if (this.interval > 0) {
-                this.newInterval = 0;
-                this.setIntervalValue();
-              }
-            },
-            decreaseInterval() {
-              if (this.interval > 0) {
-                this.newInterval = this.interval - 1;
-                this.setIntervalValue();
-              }
-            },
+          showIntervalModal() {
+            this.newInterval = this.interval;
+            this.showModal = true;
+          },
 
-            showIntervalModal() {
-              this.newInterval = this.interval;
-              this.showModal = true;
-            },
+          setIntervalValue() {
+            const value = parseInt(this.newInterval);
+            if (isNaN(value) || value < 0) {
+              this.showErrorModal = true;
+              return;
+            }
 
-            setIntervalValue() {
-              const value = parseInt(this.newInterval);
-              if (isNaN(value) || value < 0) {
-                this.showErrorModal = true;
-                return;
-              }
+            this.interval = value;
+            this.showModal = false;
 
-              this.interval = value;
-              this.showModal = false;
+            // Restart interval timer if running
+            if (this.running) {
+              this.clearIntervalTimer();
+              this.startIntervalTimer();
+            }
+            this.saveState();
+          },
 
-              // Restart interval timer if running
-              if (this.running) {
-                this.clearIntervalTimer();
-                this.startIntervalTimer();
-              }
-              this.saveState();
-            },
+          startIntervalTimer() {
+            if (this.interval > 0 && this.running) {
+              this.clearIntervalTimer();
+              this.intervalTimer = setInterval(() => {
+                if (this.flagOnInterval) {
+                  this.flag();
+                }
+                this.playBeep([
+                  {
+                    waveform: "square",
+                    frequency: 392,
+                    duration: 0.15,
+                    volume: 0.4,
+                  }, // G4
+                  {
+                    waveform: "sine",
+                    frequency: 349.23,
+                    duration: 0.15,
+                    volume: 0.4,
+                  }, // F4
+                ]);
 
-            startIntervalTimer() {
-              if (this.interval > 0 && this.running) {
-                this.clearIntervalTimer();
-                this.intervalTimer = setInterval(() => {
-                  if (this.flagOnInterval) {
-                    this.flag();
-                  }
-                  this.playBeep([
-                    {
-                      waveform: "square",
-                      frequency: 392,
-                      duration: 0.15,
-                      volume: 0.4,
-                    }, // G4
-                    {
-                      waveform: "sine",
-                      frequency: 349.23,
-                      duration: 0.15,
-                      volume: 0.4,
-                    }, // F4
-                  ]);
+                if (this.vibrationSupported) {
+                  // Vibrate for 200ms
+                  navigator.vibrate(200);
+                }
+              }, this.interval * 1000);
+            }
+          },
 
-                  if (this.vibrationSupported) {
-                    // Vibrate for 200ms
-                    navigator.vibrate(200);
-                  }
-                }, this.interval * 1000);
-              }
-            },
-
-            clearIntervalTimer() {
-              if (this.intervalTimer) {
-                clearInterval(this.intervalTimer);
-                this.intervalTimer = null;
-              }
-            },
-            /**
+          clearIntervalTimer() {
+            if (this.intervalTimer) {
+              clearInterval(this.intervalTimer);
+              this.intervalTimer = null;
+            }
+          },
+          /**
                 document.addEventListener('visibilitychange', () => {
           if (document.hidden && this.noSleepEnabled) {
             this.disableNoSleep();
@@ -844,46 +847,46 @@
       },
           */
 
-            toggleNoSleep() {
-              this.noSleepEnabled = !this.noSleepEnabled;
-              if (this.noSleepEnabled) {
-                this.enableNoSleep();
-              } else {
-                this.disableNoSleep();
-              }
-              this.saveState();
-            },
+          toggleNoSleep() {
+            this.noSleepEnabled = !this.noSleepEnabled;
+            if (this.noSleepEnabled) {
+              this.enableNoSleep();
+            } else {
+              this.disableNoSleep();
+            }
+            this.saveState();
+          },
 
-            toggleFlagOnInterval() {
-              this.flagOnInterval = !this.flagOnInterval;
-              this.saveState();
-            },
+          toggleFlagOnInterval() {
+            this.flagOnInterval = !this.flagOnInterval;
+            this.saveState();
+          },
 
-            enableNoSleep() {
-              // Enable wake lock
-              this.noSleep.enable().catch((e) => {
-                console.error("Failed to enable no sleep:", e);
-                this.noSleepEnabled = false;
-              });
-            },
+          enableNoSleep() {
+            // Enable wake lock
+            this.noSleep.enable().catch((e) => {
+              console.error("Failed to enable no sleep:", e);
+              this.noSleepEnabled = false;
+            });
+          },
 
-            disableNoSleep() {
-              // Disable wake lock
-              this.noSleep.disable();
-            },
+          disableNoSleep() {
+            // Disable wake lock
+            this.noSleep.disable();
+          },
 
-            // Clean up when component is removed
-            destroy() {
-              if (this.noSleepEnabled) {
-                this.disableNoSleep();
-              }
-              document.removeEventListener(
-                "visibilitychange",
-                this.handleVisibilityChange,
-              );
-            },
-          }));
-        });
+          // Clean up when component is removed
+          destroy() {
+            if (this.noSleepEnabled) {
+              this.disableNoSleep();
+            }
+            document.removeEventListener(
+              "visibilitychange",
+              this.handleVisibilityChange,
+            );
+          },
+        }));
+      });
     </script>
   </body>
 </html>
