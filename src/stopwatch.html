@@ -111,55 +111,88 @@
       ></div>
 
       <!-- Controls at top -->
-      <div class="absolute top-4 left-4 z-20 flex items-center gap-2">
-        <!-- Settings Cog Icon with Status Indicators -->
-        <button
-          @click="showControlPanel = !showControlPanel"
-          class="relative p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition"
-          aria-label="Settings"
-        >
-          <!-- Cog Icon -->
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5 text-gray-600 dark:text-gray-300"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
+      <div class="absolute top-4 left-4 z-20 flex items-center gap-1">
+
+  <!-- Settings Button -->
+  <button
+    @click="showControlPanel = !showControlPanel"
+    class="relative p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+    aria-label="Settings"
+  >
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      class="h-5 w-5 text-gray-600 dark:text-gray-300"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+      />
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+      />
+    </svg>
+  </button>
+  <!-- Status Indicators (now squares with saturation contrast) -->
+  <div class="flex items-center gap-1.5 mr-1">
+    <!-- Quick Flag Indicator -->
+    <div
+      class="w-3 h-3 rounded-sm border border-white dark:border-gray-800 transition-all"
+      :class="quickFlagEnabled ? 'bg-blue-600' : 'bg-blue-300/20'"
+      title="Quick Flag"
+    ></div>
+    
+    <!-- No Sleep Indicator -->
+    <div
+      class="w-3 h-3 rounded-sm border border-white dark:border-gray-800 transition-all"
+      :class="noSleepEnabled ? 'bg-orange-600' : 'bg-orange-300/20'"
+      title="No Sleep"
+    ></div>
+  </div>
+
+
+  <!-- Current Interval Display -->
+  <span
+    @click="showControlPanel = true"
+    class="text-sm font-medium cursor-pointer px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded-lg min-w-[40px] text-center"
+    x-text="interval > 0 ? interval + 's' : '0s'"
+  ></span>
+
+  <!-- Reset Button -->
+  <button
+    @click="resetInterval"
+    class="px-3 h-8 flex items-center justify-center text-gray-700 dark:text-gray-300 font-medium text-sm rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+  >
+    Reset
+  </button>
+
+          <button
+            @click="increaseInterval(1)"
+            class="px-3 h-8 flex items-center justify-center text-gray-700 dark:text-gray-300 font-medium text-sm rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition"
           >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-            />
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-            />
-          </svg>
-
-          <!-- Quick Flag Indicator (Blue) -->
-          <div
-            x-show="quickFlagEnabled"
-            class="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-blue-500 border border-white dark:border-gray-800"
-          ></div>
-
-          <!-- No Sleep Indicator (Orange) -->
-          <div
-            x-show="noSleepEnabled"
-            class="absolute -bottom-1 -right-1 w-2 h-2 rounded-full bg-orange-500 border border-white dark:border-gray-800"
-          ></div>
-        </button>
-
-        <!-- Current Interval Display -->
-        <span
-          @click="showControlPanel = true"
-          class="text-sm font-medium cursor-pointer px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded-lg"
-          x-text="interval > 0 ? interval + 's' : '0s'"
-        ></span>
-      </div>
+            +1s
+          </button>
+          <button
+            @click="increaseInterval(5)"
+            class="px-3 h-8 flex items-center justify-center text-gray-700 dark:text-gray-300 font-medium text-sm rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+          >
+            +5s
+          </button>
+          <button
+            @click="increaseInterval(25)"
+            class="px-3 h-8 flex items-center justify-center text-gray-700 dark:text-gray-300 font-medium text-sm rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+          >
+            +25s
+          </button>
+</div>
+      
 
       <!-- Control Panel Modal -->
       <div
@@ -337,10 +370,10 @@
       <div class="text-center py-16 md:py-12">
         <span
           id="timerDisplay"
-          class="text-6xl md:text-7xl font-mono text-gray-800 dark:text-gray-200"
+          class="text-3xl md:text-7xl font-mono text-gray-800 dark:text-gray-200"
           x-html="formattedTime"
         >
-          00:00:00.<span class="text-4xl md:text-5xl ms-digits">000</span>
+          00:00:00.<span class="text-xl md:text-5xl ms-digits">000</span>
         </span>
       </div>
 
