@@ -108,60 +108,82 @@
       ></div>
 
       <!-- Controls at top -->
-      <div
-        class="absolute top-4 left-4 right-4 flex justify-between items-center z-20"
-      >
-        <!-- Interval controls -->
+      <div class="absolute top-4 left-4 right-4 z-20 max-w-md mx-auto">
         <div
-          class="flex items-center space-x-2 bg-gray-200/20 dark:bg-gray-700/20 px-3 py-2 rounded-full shadow-md"
+          class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-xl shadow-lg p-3 border border-gray-200 dark:border-gray-700"
         >
-          <button
-            @click="resetInterval"
-            class="text-gray-700 dark:text-gray-300 font-bold"
+          <!-- Top Row: Interval & Quick Flag -->
+          <div
+            class="flex justify-between items-center pb-2 border-b border-gray-200 dark:border-gray-700"
           >
-            r
-          </button>
-          <button
-            @click="decreaseInterval"
-            class="text-gray-700 dark:text-gray-300 font-bold"
-          >
-            -
-          </button>
-          <span
-            @click="showIntervalModal"
-            class="text-xs font-medium cursor-pointer px-2"
-            x-text="interval > 0 ? interval + 's' : 'Interval'"
-          >
-          </span>
-          <button
-            @click="increaseInterval(1)"
-            class="text-gray-700 dark:text-gray-300 font-bold"
-          >
-            +
-          </button>
-          <button
-            @click="increaseInterval(5)"
-            class="text-gray-700 dark:text-gray-300 font-bold"
-          >
-            5+
-          </button>
-          <button
-            @click="increaseInterval(25)"
-            class="text-gray-700 dark:text-gray-300 font-bold"
-          >
-            25+
-          </button>
-        </div>
+            <!-- Interval Controls -->
+            <div class="flex items-center gap-2">
+              <button
+                @click="decreaseInterval"
+                class="w-8 h-8 flex items-center justify-center text-gray-700 dark:text-gray-300 font-bold rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+              >
+                -
+              </button>
+              <button
+                @click="resetInterval"
+                class="px-3 h-8 flex items-center justify-center text-gray-700 dark:text-gray-300 font-medium text-sm rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+              >
+                Reset
+              </button>
+            </div>
 
-        <!-- Quick flag toggle -->
-        <div
-          class="flex items-center space-x-2 bg-gray-200/20 dark:bg-gray-700/20 px-3 py-2 rounded-full shadow-md"
-        >
-          <span class="text-xs font-medium">Quick Flag</span>
-          <label class="switch">
-            <input type="checkbox" x-model="quickFlagEnabled" />
-            <span class="slider"></span>
-          </label>
+            <!-- Interval Display -->
+            <span
+              @click="showIntervalModal"
+              class="text-sm font-medium cursor-pointer px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-lg"
+              x-text="interval > 0 ? interval + 's' : '0s'"
+            >
+              <!-- Changed from 'Manual' to '0s' -->
+            </span>
+
+            <!-- Quick Flag Toggle -->
+            <div class="flex items-center gap-2">
+              <label class="switch">
+                <input type="checkbox" x-model="quickFlagEnabled" />
+                <span class="slider"></span>
+              </label>
+              <span class="text-xs font-medium">Quick Flag</span>
+            </div>
+          </div>
+
+          <!-- Bottom Row: Increment Buttons & No Sleep -->
+          <div class="flex justify-between items-center pt-2">
+            <!-- Increment Buttons -->
+            <div class="flex gap-2">
+              <button
+                @click="increaseInterval(1)"
+                class="px-3 h-8 flex items-center justify-center text-gray-700 dark:text-gray-300 font-medium text-sm rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+              >
+                +1s
+              </button>
+              <button
+                @click="increaseInterval(5)"
+                class="px-3 h-8 flex items-center justify-center text-gray-700 dark:text-gray-300 font-medium text-sm rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+              >
+                +5s
+              </button>
+              <button
+                @click="increaseInterval(25)"
+                class="px-3 h-8 flex items-center justify-center text-gray-700 dark:text-gray-300 font-medium text-sm rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+              >
+                +25s
+              </button>
+            </div>
+
+            <!-- No Sleep Toggle -->
+            <div class="flex items-center gap-2">
+              <label class="switch">
+                <input type="checkbox" @click="toggleNoSleep"/>
+                <span class="slider"></span>
+              </label>
+              <span class="text-xs font-medium">No Sleep</span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -338,6 +360,8 @@
           lastFlagTime: 0,
           quickFlagEnabled: false,
           flags: [],
+          noSleepEnabled: false,
+          noSleep: null,
           formattedTime:
             '00:00:00.<span class="text-4xl md:text-5xl ms-digits">000</span>',
           interval: 0,
@@ -351,6 +375,7 @@
           init() {
             // Initialize timer display
             this.updateTimer();
+            this.noSleep = new NoSleep();
 
             // Check for vibration API support
             this.vibrationSupported = "vibrate" in navigator;
@@ -428,54 +453,54 @@
               '00:00:00.<span class="text-4xl md:text-5xl ms-digits">000</span>';
           },
 
-            playBeep(configs = [{}]) {
-  try {
-    // Lazy initialize audio context
-    if (!this.audioContext) {
-      this.audioContext = new (window.AudioContext ||
-        window.webkitAudioContext)();
-    }
+          playBeep(configs = [{}]) {
+            try {
+              // Lazy initialize audio context
+              if (!this.audioContext) {
+                this.audioContext = new (window.AudioContext ||
+                  window.webkitAudioContext)();
+              }
 
-    const now = this.audioContext.currentTime;
-    let currentTime = now;
-    
-    // Process each config object in the array
-    configs.forEach((config, index) => {
-      const {
-        duration = 0.5,       // duration in seconds
-        volume = 0.8,         // volume (0.0-1.0)
-        waveform = "sine",    // waveform type
-        frequency = this.beepFrequency,  // frequency in Hz
-        onEnded = null        // optional callback for last beep
-      } = config;
+              const now = this.audioContext.currentTime;
+              let currentTime = now;
 
-      const oscillator = this.audioContext.createOscillator();
-      const gainNode = this.audioContext.createGain();
+              // Process each config object in the array
+              configs.forEach((config, index) => {
+                const {
+                  duration = 0.5, // duration in seconds
+                  volume = 0.8, // volume (0.0-1.0)
+                  waveform = "sine", // waveform type
+                  frequency = this.beepFrequency, // frequency in Hz
+                  onEnded = null, // optional callback for last beep
+                } = config;
 
-      oscillator.type = waveform;
-      oscillator.frequency.value = frequency;
-      gainNode.gain.value = volume;
+                const oscillator = this.audioContext.createOscillator();
+                const gainNode = this.audioContext.createGain();
 
-      oscillator.connect(gainNode);
-      gainNode.connect(this.audioContext.destination);
+                oscillator.type = waveform;
+                oscillator.frequency.value = frequency;
+                gainNode.gain.value = volume;
 
-      oscillator.start(currentTime);
-      oscillator.stop(currentTime + duration);
-      
-      currentTime += duration;
+                oscillator.connect(gainNode);
+                gainNode.connect(this.audioContext.destination);
 
-      // Cleanup
-      oscillator.onended = () => {
-        oscillator.disconnect();
-        gainNode.disconnect();
-        if (index === configs.length - 1 && onEnded) onEnded();
-      };
-    });
-  } catch (error) {
-    console.warn("Audio playback failed:", error);
-    if (this.vibrationSupported) navigator.vibrate(200);
-  }
-},
+                oscillator.start(currentTime);
+                oscillator.stop(currentTime + duration);
+
+                currentTime += duration;
+
+                // Cleanup
+                oscillator.onended = () => {
+                  oscillator.disconnect();
+                  gainNode.disconnect();
+                  if (index === configs.length - 1 && onEnded) onEnded();
+                };
+              });
+            } catch (error) {
+              console.warn("Audio playback failed:", error);
+              if (this.vibrationSupported) navigator.vibrate(200);
+            }
+          },
           flag() {
             if (!this.running) return;
 
@@ -571,11 +596,21 @@
               this.clearIntervalTimer();
               this.intervalTimer = setInterval(() => {
                 // this.flag();
-                  this.playBeep([
-                      { waveform: "square", frequency: 392, duration: 0.15, volume: 0.4 }, // G4
-  { waveform: "sine", frequency: 349.23, duration: 0.15, volume: 0.4 }, // F4
-                  ]);
-  
+                this.playBeep([
+                  {
+                    waveform: "square",
+                    frequency: 392,
+                    duration: 0.15,
+                    volume: 0.4,
+                  }, // G4
+                  {
+                    waveform: "sine",
+                    frequency: 349.23,
+                    duration: 0.15,
+                    volume: 0.4,
+                  }, // F4
+                ]);
+
                 if (this.vibrationSupported) {
                   // Vibrate for 200ms
                   navigator.vibrate(200);
@@ -589,6 +624,51 @@
               clearInterval(this.intervalTimer);
               this.intervalTimer = null;
             }
+          },
+          /**
+              document.addEventListener('visibilitychange', () => {
+        if (document.hidden && this.noSleepEnabled) {
+          this.disableNoSleep();
+        }
+      });
+    },
+        */
+
+          toggleNoSleep() {
+            this.noSleepEnabled = !this.noSleepEnabled;
+            if (this.noSleepEnabled) {
+              this.enableNoSleep();
+              alert("hi on");
+            } else {
+              this.disableNoSleep();
+              alert("offffff");
+            }
+          },
+
+          enableNoSleep() {
+            // Enable wake lock
+            this.noSleep.enable().catch((e) => {
+              console.error("Failed to enable no sleep:", e);
+              this.noSleepEnabled = false;
+            });
+
+            },
+
+          disableNoSleep() {
+            // Disable wake lock
+            this.noSleep.disable();
+
+          },
+
+          // Clean up when component is removed
+          destroy() {
+            if (this.noSleepEnabled) {
+              this.disableNoSleep();
+            }
+            document.removeEventListener(
+              "visibilitychange",
+              this.handleVisibilityChange,
+            );
           },
         }));
       });
