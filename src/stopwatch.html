@@ -10,6 +10,9 @@
       defer
       src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
     ></script>
+    <script src="
+    https://cdnjs.cloudflare.com/ajax/libs/nosleep/0.12.0/NoSleep.min.js
+"></script>
     <style>
       /* Optional: Style for the scrollbar if needed */
       .flags-container::-webkit-scrollbar {
@@ -638,10 +641,8 @@
             this.noSleepEnabled = !this.noSleepEnabled;
             if (this.noSleepEnabled) {
               this.enableNoSleep();
-              alert("hi on");
             } else {
               this.disableNoSleep();
-              alert("offffff");
             }
           },
 
