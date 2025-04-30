@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mobile Stopwatch</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
         /* Optional: Style for the scrollbar if needed */
         .flags-container::-webkit-scrollbar {
@@ -12,19 +14,16 @@
         }
         .flags-container::-webkit-scrollbar-track {
             background: #f1f1f1; /* Light track */
-            /* dark:background: #2d3748; Dark track - if needed, requires JS toggle or media query */
         }
         .flags-container::-webkit-scrollbar-thumb {
             background: #888; /* Light thumb */
-             /* dark:background: #4a5568; Dark thumb - if needed */
             border-radius: 5px;
         }
         .flags-container::-webkit-scrollbar-thumb:hover {
             background: #555; /* Light thumb hover */
-            /* dark:background: #718096; Dark thumb hover - if needed */
         }
         /* Ensure consistent width for the timer's ms part */
-        #timerDisplay .ms-digits {
+        .ms-digits {
             display: inline-block; /* Helps stabilize layout */
             min-width: 4ch; /* Adjust if needed based on font */
             text-align: left;
@@ -41,7 +40,6 @@
             width: 50%;
             height: 100%;
             z-index: 10;
-            display: none; /* Hidden by default */
         }
         /* Toggle switch styles */
         .switch {
@@ -83,34 +81,40 @@
         input:checked + .slider:before {
             transform: translateX(26px);
         }
+        @keyframes ripple {
+            0% {
+                transform: scale(0.5);
+                opacity: 0.5;
+            }
+            100% {
+                transform: scale(2);
+                opacity: 0;
+            }
+        }
     </style>
-    <script>
-        // If you want basic OS-level dark mode detection:
-        // if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        //   document.documentElement.classList.add('dark')
-        // } else {
-        //   document.documentElement.classList.remove('dark')
-        // }
-        // You can also add a button to toggle localStorage.theme between 'light' and 'dark'
-    </script>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
 
-    <div class="h-screen flex flex-col">
+    <div class="h-screen flex flex-col" x-data="stopwatch">
         <!-- Quick flag zone (clickable area) -->
-        <div id="quickFlagZone" class="quick-flag-zone"></div>
+        <div 
+            id="quickFlagZone" 
+            class="quick-flag-zone" 
+            x-show="quickFlagEnabled && running" 
+            @click="quickFlag($event)">
+        </div>
         
         <!-- Mode switcher toggle -->
         <div class="absolute top-4 right-4 flex items-center space-x-2 z-20 bg-gray-200/20 dark:bg-gray-700/20 px-3 py-2 rounded-full shadow-md">
             <span class="text-xs font-medium">Quick Flag</span>
             <label class="switch">
-                <input type="checkbox" id="quickFlagToggle">
+                <input type="checkbox" x-model="quickFlagEnabled">
                 <span class="slider"></span>
             </label>
         </div>
 
         <div class="text-center py-16 md:py-12">
-            <span id="timerDisplay" class="text-6xl md:text-7xl font-mono text-gray-800 dark:text-gray-200">
+            <span id="timerDisplay" class="text-6xl md:text-7xl font-mono text-gray-800 dark:text-gray-200" x-html="formattedTime">
                 00:00:00.<span class="text-4xl md:text-5xl ms-digits">000</span>
             </span>
         </div>
@@ -131,19 +135,40 @@
                     </tr>
                 </thead>
                 <tbody id="flagsTableBody">
+                    <template x-for="(flag, index) in flags" :key="index">
+                        <tr :class="index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-700'" class="border-b hover:bg-gray-100 dark:hover:bg-gray-600">
+                            <td class="px-6 py-3 font-medium text-gray-900 dark:text-white" x-text="flag.number"></td>
+                            <td class="px-6 py-3 font-mono" x-html="formatTimeForTableWithoutHours(flag.totalTime)"></td>
+                            <td class="px-3 py-3 font-mono" x-html="formatTimeForTableWithoutHours(flag.splitTime)"></td>
+                        </tr>
+                    </template>
                 </tbody>
             </table>
-             <p id="flagsPlaceholder" class="text-center text-gray-400 dark:text-gray-500 italic mt-6">No flags recorded yet.</p>
+            <p id="flagsPlaceholder" class="text-center text-gray-400 dark:text-gray-500 italic mt-6" x-show="flags.length === 0">No flags recorded yet.</p>
         </div>
 
         <div class="flex w-full sticky bottom-0 bg-gray-100 dark:bg-gray-800 shadow-inner pt-1"> 
-            <button id="startPauseButton" class="flex-1 py-10 text-xl font-semibold text-white bg-blue-500 hover:bg-blue-600 focus:outline-none transition duration-150 ease-in-out">
-                Start
+            <button 
+                id="startPauseButton" 
+                @click="startPause"
+                :class="running ? 'bg-blue-500 hover:bg-blue-600' : 'bg-yellow-500 hover:bg-yellow-600'"
+                class="flex-1 py-10 text-xl font-semibold text-white focus:outline-none transition duration-150 ease-in-out">
+                <span x-text="running ? 'Pause' : (elapsedTime > 0 ? 'Resume' : 'Start')"></span>
             </button>
-            <button id="resetButton" class="flex-1 py-16 text-xl font-semibold text-white bg-red-500 hover:bg-red-600 focus:outline-none transition duration-150 ease-in-out" disabled>
+            <button 
+                id="resetButton" 
+                @click="reset"
+                :disabled="elapsedTime === 0"
+                :class="{'opacity-50 cursor-not-allowed': elapsedTime === 0}"
+                class="flex-1 py-16 text-xl font-semibold text-white bg-red-500 hover:bg-red-600 focus:outline-none transition duration-150 ease-in-out">
                 Reset
             </button>
-            <button id="flagButton" class="flex-1 py-16 text-xl font-semibold text-white bg-green-500 hover:bg-green-600 focus:outline-none transition duration-150 ease-in-out" disabled>
+            <button 
+                id="flagButton" 
+                @click="flag"
+                :disabled="!running"
+                :class="{'opacity-50 cursor-not-allowed': !running}"
+                class="flex-1 py-16 text-xl font-semibold text-white bg-green-500 hover:bg-green-600 focus:outline-none transition duration-150 ease-in-out">
                 Flag
             </button>
         </div>
@@ -151,255 +176,134 @@
     </div>
 
     <script>
-        const timerDisplay = document.getElementById('timerDisplay');
-        const startPauseButton = document.getElementById('startPauseButton');
-        const flagButton = document.getElementById('flagButton');
-        const resetButton = document.getElementById('resetButton');
-        const flagsTableBody = document.getElementById('flagsTableBody');
-        const flagsPlaceholder = document.getElementById('flagsPlaceholder');
-        const quickFlagZone = document.getElementById('quickFlagZone');
-        const quickFlagToggle = document.getElementById('quickFlagToggle');
-
-        let startTime = 0;
-        let elapsedTime = 0;
-        let timerInterval;
-        let running = false;
-        let flagCounter = 0;
-        let lastFlagTime = 0; // *** ADDED: To store time of the last flag ***
-        let quickFlagEnabled = false; // Track if quick flag mode is enabled
-
-        function formatTime(milliseconds, isSplit = false) {
-            if (milliseconds < 0) milliseconds = 0; // Avoid negative times if calculation glitches
-            const totalSeconds = Math.floor(milliseconds / 1000);
-            const hours = Math.floor(totalSeconds / 3600);
-            const minutes = Math.floor((totalSeconds % 3600) / 60);
-            const seconds = totalSeconds % 60;
-            const ms = Math.floor((milliseconds % 1000));
-
-            const formattedMs = ms.toString().padStart(3, '0');
-            // Show '+' for split times if needed (optional)
-            // const prefix = isSplit ? '+' : '';
-            const mainTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-
-            // Use specific class for ms digits for potential styling/sizing
-            return `${mainTime}.<span class="text-4xl md:text-5xl ms-digits">${formattedMs}</span>`;
-        }
-
-        function formatTimeForTableWithoutHours(milliseconds) {
-            if (milliseconds < 0) milliseconds = 0;
-            const totalSeconds = Math.floor(milliseconds / 1000);
-            const hours = Math.floor(totalSeconds / 3600);
-            const minutes = Math.floor((totalSeconds % 3600) / 60);
-            const seconds = totalSeconds % 60;
-            const ms = Math.floor((milliseconds % 1000));
-
-            const formattedMs = ms.toString().padStart(3, '0');
-            const mainTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-
-            // Return simpler format for table cells, maybe smaller ms
-            return `${mainTime}.<span class="text-xs">${formattedMs}</span>`;
-        }
-
-        function formatTimeForTable(milliseconds) {
-            if (milliseconds < 0) milliseconds = 0;
-            const totalSeconds = Math.floor(milliseconds / 1000);
-            const hours = Math.floor(totalSeconds / 3600);
-            const minutes = Math.floor((totalSeconds % 3600) / 60);
-            const seconds = totalSeconds % 60;
-            const ms = Math.floor((milliseconds % 1000));
-
-            const formattedMs = ms.toString().padStart(3, '0');
-            const mainTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-
-            // Return simpler format for table cells, maybe smaller ms
-            return `${mainTime}.<span class="text-xs">${formattedMs}</span>`;
-        }
-
-        function updateTimer() {
-            const currentTime = Date.now();
-            // Ensure startTime is not 0 before calculating, prevents NaN on initial load briefly
-            const totalElapsedTime = elapsedTime + (running ? (currentTime - startTime) : 0);
-            timerDisplay.innerHTML = formatTime(totalElapsedTime);
-        }
-
-        function startPause() {
-            if (running) {
-                // Pause
-                clearInterval(timerInterval);
-                 // Calculate elapsed time accurately *before* setting running to false
-                elapsedTime += Date.now() - startTime;
-                running = false;
-                startPauseButton.textContent = 'Resume';
-                startPauseButton.classList.remove('bg-blue-500', 'hover:bg-blue-600');
-                startPauseButton.classList.add('bg-yellow-500', 'hover:bg-yellow-600');
-                flagButton.disabled = true;
-                flagButton.classList.add('opacity-50', 'cursor-not-allowed');
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('stopwatch', () => ({
+                startTime: 0,
+                elapsedTime: 0,
+                timerInterval: null,
+                running: false,
+                flagCounter: 0,
+                lastFlagTime: 0,
+                quickFlagEnabled: false,
+                flags: [],
+                formattedTime: '00:00:00.<span class="text-4xl md:text-5xl ms-digits">000</span>',
                 
-                // Disable quick flag when paused
-                if (quickFlagEnabled) {
-                    quickFlagZone.style.display = 'none';
+                init() {
+                    // Initialize timer display
+                    this.updateTimer();
+                },
+                
+                formatTime(milliseconds, isSplit = false) {
+                    if (milliseconds < 0) milliseconds = 0;
+                    const totalSeconds = Math.floor(milliseconds / 1000);
+                    const hours = Math.floor(totalSeconds / 3600);
+                    const minutes = Math.floor((totalSeconds % 3600) / 60);
+                    const seconds = totalSeconds % 60;
+                    const ms = Math.floor((milliseconds % 1000));
+
+                    const formattedMs = ms.toString().padStart(3, '0');
+                    const mainTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+                    return `${mainTime}.<span class="text-4xl md:text-5xl ms-digits">${formattedMs}</span>`;
+                },
+                
+                formatTimeForTableWithoutHours(milliseconds) {
+                    if (milliseconds < 0) milliseconds = 0;
+                    const totalSeconds = Math.floor(milliseconds / 1000);
+                    const minutes = Math.floor((totalSeconds % 3600) / 60);
+                    const seconds = totalSeconds % 60;
+                    const ms = Math.floor((milliseconds % 1000));
+
+                    const formattedMs = ms.toString().padStart(3, '0');
+                    const mainTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+                    return `${mainTime}.<span class="text-xs">${formattedMs}</span>`;
+                },
+                
+                updateTimer() {
+                    if (this.running) {
+                        const currentTime = Date.now();
+                        const totalElapsedTime = this.elapsedTime + (currentTime - this.startTime);
+                        this.formattedTime = this.formatTime(totalElapsedTime);
+                    } else {
+                        this.formattedTime = this.formatTime(this.elapsedTime);
+                    }
+                    
+                    // Set up the next update
+                    if (this.running) {
+                        requestAnimationFrame(this.updateTimer.bind(this));
+                    }
+                },
+                
+                startPause() {
+                    if (this.running) {
+                        // Pause timer
+                        this.elapsedTime += Date.now() - this.startTime;
+                        this.running = false;
+                        cancelAnimationFrame(this.timerInterval);
+                    } else {
+                        // Start or resume timer
+                        this.startTime = Date.now();
+                        this.running = true;
+                        requestAnimationFrame(this.updateTimer.bind(this));
+                    }
+                },
+                
+                reset() {
+                    cancelAnimationFrame(this.timerInterval);
+                    this.running = false;
+                    this.elapsedTime = 0;
+                    this.startTime = 0;
+                    this.flagCounter = 0;
+                    this.lastFlagTime = 0;
+                    this.flags = [];
+                    this.formattedTime = '00:00:00.<span class="text-4xl md:text-5xl ms-digits">000</span>';
+                },
+                
+                flag() {
+                    if (!this.running) return;
+                    
+                    const currentTime = Date.now();
+                    const currentTotalFlagTime = this.elapsedTime + (currentTime - this.startTime);
+                    const timeDifference = currentTotalFlagTime - this.lastFlagTime;
+                    
+                    this.flagCounter++;
+                    
+                    // Add flag to the beginning of the array (for reverse chronological display)
+                    this.flags.unshift({
+                        number: this.flagCounter,
+                        totalTime: currentTotalFlagTime,
+                        splitTime: timeDifference
+                    });
+                    
+                    // Update the last flag time
+                    this.lastFlagTime = currentTotalFlagTime;
+                },
+                
+                quickFlag(event) {
+                    if (this.quickFlagEnabled && this.running) {
+                        this.flag();
+                        
+                        // Create ripple effect
+                        const ripple = document.createElement('div');
+                        ripple.classList.add('absolute', 'bg-green-400', 'opacity-50', 'rounded-full');
+                        ripple.style.width = '60px';
+                        ripple.style.height = '60px';
+                        ripple.style.left = (event.clientX - 30) + 'px';
+                        ripple.style.top = (event.clientY - 30) + 'px';
+                        ripple.style.animation = 'ripple 0.6s linear';
+                        document.body.appendChild(ripple);
+                        
+                        setTimeout(() => {
+                            document.body.removeChild(ripple);
+                        }, 600);
+                        
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
                 }
-
-            } else {
-                // Start or Resume
-                // If resuming, elapsedTime already holds the paused time.
-                // If starting fresh, elapsedTime is 0.
-                startTime = Date.now(); // Set new start time reference
-                timerInterval = setInterval(updateTimer, 30); // Update display frequently
-                running = true;
-                startPauseButton.textContent = 'Pause';
-                startPauseButton.classList.remove('bg-yellow-500', 'hover:bg-yellow-600');
-                startPauseButton.classList.add('bg-blue-500', 'hover:bg-blue-600');
-                flagButton.disabled = false;
-                resetButton.disabled = false;
-                flagButton.classList.remove('opacity-50', 'cursor-not-allowed');
-                resetButton.classList.remove('opacity-50', 'cursor-not-allowed');
-                
-                // Re-enable quick flag zone if the mode is active
-                if (quickFlagEnabled) {
-                    quickFlagZone.style.display = 'block';
-                }
-                
-                if (flagsTableBody.children.length === 0) {
-                   flagsPlaceholder.style.display = 'none';
-                }
-            }
-        }
-
-        function reset() {
-            clearInterval(timerInterval);
-            running = false;
-            elapsedTime = 0;
-            startTime = 0;
-            flagCounter = 0;
-            lastFlagTime = 0; // *** ADDED: Reset last flag time ***
-            timerDisplay.innerHTML = '00:00:00.<span class="text-4xl md:text-5xl ms-digits">000</span>';
-            startPauseButton.textContent = 'Start';
-            startPauseButton.classList.remove('bg-yellow-500', 'hover:bg-yellow-600');
-            startPauseButton.classList.add('bg-blue-500', 'hover:bg-blue-600');
-            flagsTableBody.innerHTML = ''; // Clear table content
-            flagButton.disabled = true;
-            resetButton.disabled = true;
-            flagButton.classList.add('opacity-50', 'cursor-not-allowed');
-            resetButton.classList.add('opacity-50', 'cursor-not-allowed');
-            flagsPlaceholder.style.display = 'block'; // Show placeholder
-            
-            // Hide quick flag zone when reset
-            quickFlagZone.style.display = 'none';
-        }
-
-        function flag() {
-            if (!running) return; // Don't flag if not running
-
-            const currentTime = Date.now();
-            const currentTotalFlagTime = elapsedTime + (currentTime - startTime);
-            // *** ADDED: Calculate difference from last flag ***
-            const timeDifference = currentTotalFlagTime - lastFlagTime;
-
-            flagCounter++;
-
-            flagsPlaceholder.style.display = 'none'; // Ensure placeholder is hidden
-
-            const tr = document.createElement('tr');
-            // Alternating row colors slightly improve readability in long lists
-            tr.classList.add(flagCounter % 2 === 0 ? 'bg-gray-50' : 'bg-white', 'dark:bg-gray-800', 'dark:border-gray-700', 'border-b', 'hover:bg-gray-100', 'dark:hover:bg-gray-600');
-
-            const tdNum = document.createElement('td');
-            tdNum.classList.add('px-6', 'py-3', 'font-medium', 'text-gray-900', 'dark:text-white');
-            tdNum.textContent = flagCounter;
-
-            const tdTime = document.createElement('td');
-            tdTime.classList.add('px-6', 'py-3', 'font-mono');
-            // Use specific table formatter if desired
-            tdTime.innerHTML = formatTimeForTableWithoutHours(currentTotalFlagTime);
-
-            // *** ADDED: Create and populate the Split Time cell ***
-            const tdDiff = document.createElement('td');
-            tdDiff.classList.add('px-3', 'py-3', 'font-mono');
-            tdDiff.innerHTML = formatTimeForTableWithoutHours(timeDifference); // Format the difference
-
-            tr.appendChild(tdNum);
-            tr.appendChild(tdTime);
-            tr.appendChild(tdDiff); // Append the new cell
-
-            flagsTableBody.prepend(tr); // Insert row at the beginning
-
-            // *** ADDED: Update lastFlagTime for the next split calculation ***
-            lastFlagTime = currentTotalFlagTime;
-            
-            // Optional: Add visual feedback for quick flag
-            if (quickFlagEnabled) {
-                // Create a temporary ripple effect where clicked
-                const ripple = document.createElement('div');
-                ripple.classList.add('absolute', 'bg-green-400', 'opacity-50', 'rounded-full');
-                ripple.style.width = '60px';
-                ripple.style.height = '60px';
-                ripple.style.left = (event.clientX - 30) + 'px';
-                ripple.style.top = (event.clientY - 30) + 'px';
-                ripple.style.animation = 'ripple 0.6s linear';
-                document.body.appendChild(ripple);
-                
-                setTimeout(() => {
-                    document.body.removeChild(ripple);
-                }, 600);
-            }
-        }
-
-        // Toggle Quick Flag Mode
-        function toggleQuickFlag() {
-            quickFlagEnabled = quickFlagToggle.checked;
-            
-            if (quickFlagEnabled && running) {
-                quickFlagZone.style.display = 'block';
-            } else {
-                quickFlagZone.style.display = 'none';
-            }
-        }
-
-        // Add Event Listeners
-        startPauseButton.addEventListener('click', startPause);
-        resetButton.addEventListener('click', reset);
-        flagButton.addEventListener('click', flag);
-        quickFlagToggle.addEventListener('change', toggleQuickFlag);
-        
-        // Event listener for the quick flag zone
-        quickFlagZone.addEventListener('click', function(event) {
-            // Only trigger if enabled and timer is running
-            if (quickFlagEnabled && running) {
-                flag();
-                event.preventDefault();
-                event.stopPropagation();
-            }
+            }));
         });
-
-        // Add ripple animation
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes ripple {
-                0% {
-                    transform: scale(0.5);
-                    opacity: 0.5;
-                }
-                100% {
-                    transform: scale(2);
-                    opacity: 0;
-                }
-            }
-        `;
-        document.head.appendChild(style);
-
-        // Initial setup on load
-        flagButton.disabled = true;
-        resetButton.disabled = true;
-        flagButton.classList.add('opacity-50', 'cursor-not-allowed');
-        resetButton.classList.add('opacity-50', 'cursor-not-allowed');
-        if (flagsTableBody.children.length === 0) {
-            flagsPlaceholder.style.display = 'block';
-        } else {
-            flagsPlaceholder.style.display = 'none';
-        }
-        // Update timer display initially to show 000
-        updateTimer();
     </script>
 
 </body>
