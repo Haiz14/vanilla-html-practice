@@ -496,11 +496,19 @@
 
           init() {
             // Initialize timer display
+            this.loadState();
             this.updateTimer();
             this.noSleep = new NoSleep();
 
             // Check for vibration API support
             this.vibrationSupported = "vibrate" in navigator;
+
+            // Save state when window closes
+            window.addEventListener("beforeunload", () => this.saveState());
+
+            // wont't save the time tjis timer was closed at, there's some trick to it. 
+            // 
+            // setInterval(() => this.saveState(), 30000);
           },
 
           formatTime(milliseconds, isSplit = false) {
@@ -515,6 +523,59 @@
             const mainTime = `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
 
             return `${mainTime}.<span class="text-4xl md:text-5xl ms-digits">${formattedMs}</span>`;
+          },
+
+          saveState() {
+            const state = {
+              elapsedTime: this.elapsedTime,
+              running: this.running,
+              flagCounter: this.flagCounter,
+              lastFlagTime: this.lastFlagTime,
+              flags: this.flags,
+              noSleepEnabled: this.noSleepEnabled,
+              interval: this.interval,
+              beepFrequency: this.beepFrequency,
+            };
+
+            try {
+              localStorage.setItem("stopwatchState", JSON.stringify(state));
+            } catch (e) {
+              console.warn("Failed to save state to localStorage:", e);
+            }
+          },
+
+          // Load state from localStorage
+          loadState() {
+            try {
+              const saved = localStorage.getItem("stopwatchState");
+              if (saved) {
+                const state = JSON.parse(saved);
+
+                // Restore simple values
+                this.elapsedTime = state.elapsedTime || 0;
+                this.flagCounter = state.flagCounter || 0;
+                this.lastFlagTime = state.lastFlagTime || 0;
+                // This needs user to click a button to ne enabled
+                // this.quickFlagEnabled = state.quickFlagEnabled || false;
+                this.noSleepEnabled = state.noSleepEnabled || false;
+                this.interval = state.interval || 0;
+                this.beepFrequency = state.beepFrequency || 440;
+
+                // Restore flags array with validation
+                this.flags = Array.isArray(state.flags) ? state.flags : [];
+
+                // Handle running state carefully
+                if (state.running) {
+                  this.running = false; // Start paused by default for safety
+                  this.startPause(); // Let user manually resume
+                }
+
+                // Update display
+                this.formattedTime = this.formatTime(this.elapsedTime);
+              }
+            } catch (e) {
+              console.warn("Failed to load state from localStorage:", e);
+            }
           },
 
           formatTimeForTableWithoutHours(milliseconds) {
@@ -560,6 +621,7 @@
               requestAnimationFrame(this.updateTimer.bind(this));
               this.startIntervalTimer();
             }
+            this.saveState()
           },
 
           reset() {
@@ -573,6 +635,7 @@
             this.flags = [];
             this.formattedTime =
               '00:00:00.<span class="text-4xl md:text-5xl ms-digits">000</span>';
+            this.saveState()
           },
 
           playBeep(configs = [{}]) {
@@ -642,6 +705,7 @@
 
             // Update the last flag time
             this.lastFlagTime = currentTotalFlagTime;
+            this.saveState();
           },
 
           quickFlag(event) {
@@ -711,6 +775,7 @@
               this.clearIntervalTimer();
               this.startIntervalTimer();
             }
+            this.saveState();
           },
 
           startIntervalTimer() {
@@ -763,6 +828,7 @@
             } else {
               this.disableNoSleep();
             }
+            this.saveState();
           },
 
           enableNoSleep() {
