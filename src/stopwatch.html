@@ -115,7 +115,6 @@
         <div
           class="flex items-center space-x-2 bg-gray-200/20 dark:bg-gray-700/20 px-3 py-2 rounded-full shadow-md"
         >
-
           <button
             @click="resetInterval"
             class="text-gray-700 dark:text-gray-300 font-bold"
@@ -346,6 +345,8 @@
           showModal: false,
           showErrorModal: false,
           newInterval: 0,
+          audioContext: null, // For Web Audio API
+          beepFrequency: 440, // Pitch of the beep (440Hz = A4 note)
 
           init() {
             // Initialize timer display
@@ -427,6 +428,54 @@
               '00:00:00.<span class="text-4xl md:text-5xl ms-digits">000</span>';
           },
 
+            playBeep(configs = [{}]) {
+  try {
+    // Lazy initialize audio context
+    if (!this.audioContext) {
+      this.audioContext = new (window.AudioContext ||
+        window.webkitAudioContext)();
+    }
+
+    const now = this.audioContext.currentTime;
+    let currentTime = now;
+    
+    // Process each config object in the array
+    configs.forEach((config, index) => {
+      const {
+        duration = 0.5,       // duration in seconds
+        volume = 0.8,         // volume (0.0-1.0)
+        waveform = "sine",    // waveform type
+        frequency = this.beepFrequency,  // frequency in Hz
+        onEnded = null        // optional callback for last beep
+      } = config;
+
+      const oscillator = this.audioContext.createOscillator();
+      const gainNode = this.audioContext.createGain();
+
+      oscillator.type = waveform;
+      oscillator.frequency.value = frequency;
+      gainNode.gain.value = volume;
+
+      oscillator.connect(gainNode);
+      gainNode.connect(this.audioContext.destination);
+
+      oscillator.start(currentTime);
+      oscillator.stop(currentTime + duration);
+      
+      currentTime += duration;
+
+      // Cleanup
+      oscillator.onended = () => {
+        oscillator.disconnect();
+        gainNode.disconnect();
+        if (index === configs.length - 1 && onEnded) onEnded();
+      };
+    });
+  } catch (error) {
+    console.warn("Audio playback failed:", error);
+    if (this.vibrationSupported) navigator.vibrate(200);
+  }
+},
           flag() {
             if (!this.running) return;
 
@@ -482,7 +531,6 @@
             this.setIntervalValue();
           },
 
-            
           resetInterval() {
             if (this.interval > 0) {
               this.newInterval = 0;
@@ -523,6 +571,11 @@
               this.clearIntervalTimer();
               this.intervalTimer = setInterval(() => {
                 // this.flag();
+                  this.playBeep([
+                      { waveform: "square", frequency: 392, duration: 0.15, volume: 0.6 }, // G4
+  { waveform: "square", frequency: 349.23, duration: 0.15, volume: 0.6 }, // F4
+                  ]);
+  
                 if (this.vibrationSupported) {
                   // Vibrate for 200ms
                   navigator.vibrate(200);
