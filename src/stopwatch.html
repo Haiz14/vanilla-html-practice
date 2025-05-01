@@ -498,6 +498,7 @@
           timerInterval: null,
           running: false,
           flagCounter: 0,
+          intervalFlagCount: 0,
           lastFlagTime: 0,
           quickFlagEnabled: false,
           flagOnInterval: true,
@@ -554,6 +555,7 @@
                 : this.elapsedTime,
               running: this.running,
               flagCounter: this.flagCounter,
+              intervalFlagCount: this.intervalFlagCount,
               lastFlagTime: this.lastFlagTime,
               flags: this.flags,
               quickFlagEnabled: this.quickFlagEnabled,
@@ -582,6 +584,7 @@
                 // Restore simple values
                 this.elapsedTime = state.elapsedTime || 0;
                 this.flagCounter = state.flagCounter || 0;
+                this.intervalFlagCount = state.intervalFlagCount;
                 this.lastFlagTime = state.lastFlagTime || 0;
                 this.quickFlagEnabled = state.quickFlagEnabled || false;
                 this.flagOnInterval = state.flagOnInterval || false;
@@ -717,7 +720,8 @@
               if (this.vibrationSupported) navigator.vibrate(200);
             }
           },
-          flag(highlight = null) {
+          flag(highlight = null, intervalFlagCount=null) {
+            // highlight and intervalFlagCount are only sent by startIntervalTimer()
             if (!this.running) return;
 
             const currentTime = Date.now();
@@ -725,11 +729,13 @@
               this.elapsedTime + (currentTime - this.startTime);
             const timeDifference = currentTotalFlagTime - this.lastFlagTime;
 
+            if(intervalFlagCount === null) {
             this.flagCounter++;
+            }
 
             // Add flag to the beginning of the array (for reverse chronological display)
             this.flags.unshift({
-              number: this.flagCounter,
+              number: intervalFlagCount ?? this.flagCounter,
               totalTime: currentTotalFlagTime,
               splitTime: timeDifference,
               highlight: highlight,
@@ -819,11 +825,14 @@
                 if (this.firstInterval === true) {
                   this.firstInterval = false;
                   this.flagCounter = 0;
+                  this.intervalFlagCount = 0;
                   highlight = "green";
                   this.saveState();
                 }
                 if (this.flagOnInterval) {
-                  this.flag(highlight);
+                  this.intervalFlagCount++;
+                  // this.flag savesState, no need to save here
+                  this.flag(highlight, this.intervalFlagCount);
                 }
                 this.playBeep([
                   {
