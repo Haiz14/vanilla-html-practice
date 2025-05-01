@@ -423,8 +423,11 @@
           <tbody id="flagsTableBody">
             <template x-for="(flag, index) in flags" :key="index">
               <tr
-                :class="index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-700'"
-                class="border-b hover:bg-gray-100 dark:hover:bg-gray-600"
+                :class="[
+        index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-700',
+        flag.highlight  ? 'border-green-800 dark:border-green-200' : '',
+        'border-b hover:bg-gray-100 dark:hover:bg-gray-600'
+      ]"
               >
                 <td
                   class="px-6 py-3 font-medium text-gray-900 dark:text-white"
@@ -475,7 +478,7 @@
         </button>
         <button
           id="flagButton"
-          @click="flag"
+          @click="flag()"
           :disabled="!running"
           :class="{'opacity-50 cursor-not-allowed': !running}"
           class="flex-1 py-16 text-xl font-semibold text-white bg-green-500 hover:bg-green-600 focus:outline-none transition duration-150 ease-in-out"
@@ -504,6 +507,7 @@
           formattedTime:
             '00:00:00.<span class="text-xl md:text-xl ms-digits">000</span>',
           interval: 0,
+          firstInterval: false,
           intervalTimer: null,
           showModal: false,
           showErrorModal: false,
@@ -556,6 +560,7 @@
               flagOnInterval: this.flagOnInterval || false,
               noSleepEnabled: this.noSleepEnabled,
               interval: this.interval,
+              firstInterval: this.firstInterval,
               beepFrequency: this.beepFrequency,
             };
 
@@ -582,6 +587,7 @@
                 // This needs user to click a button to ne enabled
                 // this.noSleepEnabled = state.noSleepEnabled || false;
                 this.interval = state.interval || 0;
+                this.firstInterval = state.firstInterval || 0;
                 this.beepFrequency = state.beepFrequency || 440;
 
                 // Restore flags array with validation
@@ -710,7 +716,7 @@
               if (this.vibrationSupported) navigator.vibrate(200);
             }
           },
-          flag() {
+          flag(highlight = false) {
             if (!this.running) return;
 
             const currentTime = Date.now();
@@ -725,6 +731,7 @@
               number: this.flagCounter,
               totalTime: currentTotalFlagTime,
               splitTime: timeDifference,
+              highlight: highlight,
             });
 
             // Update the last flag time
@@ -793,6 +800,7 @@
 
             this.interval = value;
             this.showModal = false;
+            this.firstInterval = true;
 
             // Restart interval timer if running
             if (this.running) {
@@ -804,10 +812,17 @@
 
           startIntervalTimer() {
             if (this.interval > 0 && this.running) {
+              let highlight = false;
               this.clearIntervalTimer();
               this.intervalTimer = setInterval(() => {
+                let highlight = false;
+                if (this.firstInterval === true) {
+                  this.firstInterval = false;
+                  highlight = true;
+                  this.saveState();
+                }
                 if (this.flagOnInterval) {
-                  this.flag();
+                  this.flag(highlight);
                 }
                 this.playBeep([
                   {
