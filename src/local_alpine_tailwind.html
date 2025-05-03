@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Local TEst</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta property="og:title" content="Local Pkg Dev TEst" />
+    <meta property="og:type" content="website" />
+
+    <script defer src="/alpine_v3.14.9"></script>
+    <script src="/tailwind_v4.1.5"></script>
+<body class="bg-sky-100 min-h-screen flex items-center justify-center p-4">
+    <div x-data="{ open: false }" class="max-w-4xl w-full md:mx-8 lg:mx-36  " style="aspect-ratio: 2:3">
+        <h1 class="text-sky-600 text-4xl lg:text-6xl font-bold uppercase mb-8 text-center">Local Pkg Dev</h1>
+        
+        <div class="border-2 border-sky-600 bg-sky-200 shadow-lg">
+            <button 
+                @click="open = !open"
+                class="w-full px-6 py-5 text-left hover:bg-sky-300 transition-colors flex justify-between items-center border-b-2 border-sky-600"
+            >
+                <span class="font-bold text-xl lg:text-2xl text-sky-800 uppercase">Uses local Alpine and Tailwind</span>
+                <svg class="w-8 h-8 text-sky-800 transform transition-transform" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"/>
+                </svg>
+            </button>
+            <div x-show="open" x-collapse class="p-6 bg-sky-50">
+                <p class="text-sky-900 text-xl leading-normal">Made with 💙 by <a class="underline" href="https://github.com/haiz14">haiz</a></p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
