@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Spacing Size and ratio</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta property="og:title" content="Spacing size and Ratio" />
+    <meta property="og:type" content="website" />
+
+    <script defer src="../alpine_v3.14.9"></script>
+    <script src="../tailwind_v4.1.5"></script>
+  </head>
+<body class="p-6 font-mono bg-yellow-400 text-black"
+      x-data="{
+          minRaw: '1.0',
+          maxRaw: '100.0',
+          ratioRaw: '1.2',
+          convertPixelToCM: function (value) {
+            return value / 96 * 2.54;
+          },
+          get modularScale() {
+            const values = [];
+            const min = parseFloat(this.minRaw)
+            const max = parseFloat(this.maxRaw)
+            const ratio = parseFloat(this.ratioRaw)
+            if (this.ratioRaw <= 1 || min > max || min < 1) {
+            return values;
+          }
+            let current = min;
+
+            while (current <= max) {
+              values.push(current);
+              current *= ratio;
+            }
+            return values.map(value => {
+                return {
+                    px: parseFloat(value),
+                    cm: this.convertPixelToCM(value),
+                };
+            });
+          },
+      }"
+>
+    <div class="space-y-4">
+        <div>
+            <label class="block font-bold uppercase tracking-wide">Min:</label>
+            <input type="text" x-model="minRaw"
+                   class="border-2 border-black bg-yellow-200 text-black px-2 py-1 w-full" />
+        </div>
+        <div>
+            <label class="block font-bold uppercase tracking-wide">Max:</label>
+            <input type="text" x-model="maxRaw"
+                   class="border-2 border-black bg-yellow-200 text-black px-2 py-1 w-full" />
+        </div>
+        <div>
+            <label class="block font-bold uppercase tracking-wide">Ratio:</label>
+            <input type="text" x-model="ratioRaw"
+                   class="border-2 border-black bg-yellow-200 text-black px-2 py-1 w-full" />
+        </div>
+<div class="mt-4 bg-yellow-100 border-2 border-black p-4 flex flex-wrap gap-2">
+    <template x-for="value in modularScale">
+        <p class="flex flex-col font-mono text-sm border border-black p-2 w-[140px]">
+            <span x-text="value.px.toFixed(2) + ' px'"></span>
+            <span x-text="value.cm.toFixed(2) + ' cm'"></span>
+        </p>
+    </template>
+</div>
+
+</body>
+
+</html>
