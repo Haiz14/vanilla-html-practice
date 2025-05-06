@@ -1,0 +1,86 @@
+<!doctype html>
+<!-- 
+- create notes list
+- create ranges 
+-->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Spacing Size and ratio</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta property="og:title" content="Spacing size and Ratio" />
+    <meta property="og:type" content="website" />
+
+    <script defer src="../alpine_v3.14.9"></script>
+    <script src="../tailwind_v4.1.5"></script>
+  </head>
+
+  <body x-data="{
+    initialPixel: 200,
+    selectedNote: 2,
+    ratios:{
+        octave: '1:2',
+        majorSeventh: '8:15',
+        minorSeventh: '9:16',
+        majorSixth: '3:5',
+        minorSixth: '5:8',
+        majorFifth: '2:3',
+        minorFifth: '1:1.414',
+        majorFourth: '1:1.414',
+        minorFourth: '3:4',
+        majorThird: '4:5',
+        minorThird: '5:6',
+        majorSecond: '8:9',
+        minorSecond: '15:16',
+        unison: '1:1',
+    },
+     get getRangesNotes(){
+      // all the ratios are based on 1
+      // get the divided value and add it to that note, return the value
+      // 1:2 = 1/2 = 0.5
+      // 1:2 + 1 = 1.5
+
+      if (!this.initialPixel || !this.selectedNote) {
+        return {}
+      }
+      const intialPixel = parseInt(this.initialPixel);
+      const selectedNote = parseInt(this.selectedNote);
+
+      const notes = {}
+      for (const [key, value] of Object.entries(this.ratios)) {
+        const [num, denom] = value.split(':').map(Number);
+        const ratio = denom / num;
+        notes[key + ' ' + value] = (ratio * selectedNote).toFixed(2);
+      }
+      return notes
+    }
+
+  }">
+
+  <div>
+
+  <label for="selectedNote"> Selected Note</label>
+  <input type="number" x-model="selectedNote">
+  </div>
+  <div>
+    <label for="initialPixel"> Initial Pixel</label>
+  <input type="number" x-model="initialPixel">
+  </div>
+  <div>
+
+    <template
+      x-for="[id, value] in Object.entries(getRangesNotes)"
+    >
+
+        <div>
+        <span x-text="id" class="font-bold"></span>
+        <span x-text="value" class="text-gray-600"></span>
+
+        <div :class="'w-[' + value * initialPixel + 'px] h-[' + initialPixel + 'px]'  " class="bg-black mt-2 overflow-x"
+        ></div>
+        </div>
+    </template>
+  </div>
+    
+  </body>
+</html>
