@@ -1,4 +1,20 @@
 <!doctype html>
+<!--
+  TODO
+    - add vars:
+      - save and load:
+        - quarter, fiveMins, Twenty Mins beep config
+    - inputs:
+      - comfig settings
+        - toggleQyater
+        - toggleTwenety
+        - toggleFive
+    - features:
+      - beepEvery
+      - toggleBeepEveryQuater
+      - tiggleBeeoEveryFiveMins
+      - toggleBeeoEveryTwentyMins
+-->
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -502,6 +518,9 @@
           lastFlagTime: 0,
           quickFlagEnabled: false,
           flagOnInterval: true,
+          intervalEveryquarter: false,
+          intervalEveryFiveMins: false,
+          intervalEveryTwentyMins: false,
           flags: [],
           noSleepEnabled: false,
           showControlPanel: false,
@@ -556,6 +575,9 @@
               running: this.running,
               flagCounter: this.flagCounter,
               intervalFlagCount: this.intervalFlagCount,
+              intervalEveryquarter: this.intervalEveryquarter,
+              intervalEveryFiveMins: this.intervalEveryFiveMins,
+              intervalEveryTwentyMins: this.intervalEveryTwentyMins,
               lastFlagTime: this.lastFlagTime,
               flags: this.flags,
               quickFlagEnabled: this.quickFlagEnabled,
@@ -585,6 +607,9 @@
                 this.elapsedTime = state.elapsedTime || 0;
                 this.flagCounter = state.flagCounter || 0;
                 this.intervalFlagCount = state.intervalFlagCount;
+                this.intervalEveryquarter = state.intervalEveryquarter;
+                this.intervalEveryFiveMins = state.intervalEveryFiveMins;
+                this.intervalEveryTwentyMins = state.intervalEveryTwentyMins;
                 this.lastFlagTime = state.lastFlagTime || 0;
                 this.quickFlagEnabled = state.quickFlagEnabled || false;
                 this.flagOnInterval = state.flagOnInterval || false;
