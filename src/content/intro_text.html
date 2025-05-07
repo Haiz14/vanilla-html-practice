@@ -199,7 +199,6 @@
               x-for="([key, value]) in Object.entries(content.alphabets)">
               <div class="bg-orange-800 p-4 rounded border border-orange-700">
                 <h3 class="font-bold text-orange-200"
-                  :class="'text-' + textSize"
                   x-text="key.replace('_', ' ')"></h3>
                 <p class="text-orange-100" :class="'text-' + textSize"
                   x-text="value"></p>
@@ -229,7 +228,6 @@
             <template x-for="([key, value]) in Object.entries(content.words)">
               <div class="bg-orange-800 p-4 rounded border border-orange-700">
                 <h3 class="font-bold text-orange-200"
-                  :class="'text-' + textSize"
                   x-text="key.replace('_', ' ')"></h3>
                 <p class="text-orange-100" :class="'text-' + textSize"
                   x-text="value"></p>
@@ -260,7 +258,6 @@
               x-for="([key, value]) in Object.entries(content.sentences)">
               <div class="bg-orange-800 p-4 rounded border border-orange-700">
                 <h3 class="font-bold text-orange-200"
-                  :class="'text-' + textSize"
                   x-text="key.replace('_', ' ')"></h3>
                 <p class="text-orange-100" :class="'text-' + textSize"
                   x-text="value"></p>
@@ -291,7 +288,7 @@
               x-for="([key, value]) in Object.entries(content.paragraphs)">
               <div class="bg-orange-800 p-4 rounded border border-orange-700">
                 <h3 class="font-bold text-orange-200 mb-2"
-                  :class="'text-' + textSize" x-text="key + ' paragraph'"></h3>
+                  x-text="key + ' paragraph'"></h3>
                 <p class="text-orange-100" :class="'text-' + textSize"
                   x-text="value"></p>
               </div>
