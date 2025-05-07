@@ -1,0 +1,183 @@
+<!doctype html>
+<!-- 
+- ~~create notes list~~
+- ~~create ranges ~~
+- ~~draw figures~~
+-->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Intro to various text content</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta property="og:title" content="Spacing size and Ratio" />
+    <meta property="og:type" content="website" />
+
+    <script defer src="../alpine_v3.14.9.js" type="module"></script>
+    <script src="../tailwind_v4.1.5.js" type="module"></script>
+  </head>
+
+  <body 
+  x-data="{
+    content: {
+      'alphabets': {
+        '1_character': 'I',
+        '2_characters': 'Go',
+        '4_characters': 'Bird',
+        '8_characters': 'Enormous',
+        '16_characters': 'Unconventionality',
+        '32_characters': 'Supercalifragilisticexpialidocious',
+        '45_characters': 'Pneumonoultramicroscopicsilicovolcanoconiosis'
+      },
+      words: {
+        one_word: 'Star.',
+        two_words: 'Bright star.',
+        four_words: 'Very bright distant star.',
+        eight_words: 'An extremely very bright, distant, pulsating blue star.',
+        sixteen_words: 'The most phenomenally, extremely, very bright, distant, pulsating, ancient, massive blue supergiant star.'
+      },
+      sentences: {
+        sentence: 'The fat cat',
+        medium_sentece: 'The fat cat is sleeping on the mat',
+        long_sentence: 'Initially, the fat cat was sleeping on the mat, but then it woke up and started to play with a ball of yarn.'
+      },
+      paragraphs: {
+        '25_words': 'The fat cat lounged in the sun, orange fur gleaming. His stomach spilled over the windowsill as he tracked birds with half-closed eyes.',
+        '50_words': 'The fat cat, affectionately named Meatball, ruled the household with surprising agility despite his girth. His purr rumbled like a small engine while he commanded the best spots in the house. When not sleeping, he pursued treats with single-minded determination that belied his rotund appearance.',
+        '75_words': 'Mr. Whiskers, the neighborhood\'s most notorious fat cat, had achieved local celebrity status. His impressive bulk flowed gracefully over furniture edges, defying physics. Despite numerous diet attempts, he maintained his magnificent proportions through strategic begging and midnight kitchen raids. Children delighted in his pillowy softness, while birds watched warily from safe distances. His slow blinks communicated supreme contentment with his luxurious lifestyle of naps, snacks, and occasional half-hearted toy batting.',
+        '100_words': 'Sir Chonksalot arrived as a skinny stray but transformed into the quintessential fat cat after discovering the joys of indoor living. His tiger-striped coat stretched impressively around his substantial middle, creating an almost perfect sphere when he curled up for naps—which was most of the time. Despite veterinary warnings, his owners couldn\'t resist his plaintive meows for second breakfasts and pre-dinner appetizers. He moved with surprising grace when motivated by the sound of a can opener, but otherwise preferred to conserve energy through strategic placement in sunbeams or atop warm laundry piles.',
+        '150_words': 'Professor Pudge, the distinguished fat cat of Maple Street, carried his excess weight with remarkable dignity. His black and white tuxedo pattern stretched magnificently across his rotund frame, giving him the appearance of an overstuffed formal pillow. Neighbors often spotted him sunning his considerable bulk on the front porch, paws tucked neatly beneath the shelf of his chest. Though his veterinarian gently suggested portion control, Professor Pudge maintained his impressive dimensions through cunning manipulation of his three separate feeding households. Neither the Johnsons, the Garcias, nor the elderly Mrs. Finch suspected they were being played by this masterful con artist. When not eating or sleeping—his two primary occupations—he could be found attempting to squeeze through impossibly small spaces, seemingly forgetting his grand proportions. These miscalculations often resulted in comical situations that he handled with surprising poise, quickly grooming himself afterward as if to say, \'I meant to do that.\'',
+        '200_words': 'Lord Fluffington III, the magnificent fat cat of Willow Manor, was a creature of extraordinary proportions and even more extraordinary personality. His orange and white fur billowed around him like royal robes, particularly when he claimed his throne—a sunken spot on the living room couch perfectly molded to his substantial form over years of dedicated lounging. His daily schedule was a carefully orchestrated symphony of indulgence: breakfast followed by a nap, mid-morning treats followed by a longer nap, lunch preceding an extended snooze, afternoon snacks transitioning to evening dozing, dinner yielding to nighttime slumber. Between these critical commitments, he occasionally found time to bat lazily at dangling toys or waddle majestically between favorite resting spots. Despite his impressive girth, Lord Fluffington possessed surprising agility when motivated—particularly when unauthorized humans approached the refrigerator or when the distant sound of a can opener pierced his deepest sleep. His acceleration from motionless blob to kitchen sentinel defied both physics and veterinary expectations. His purr resonated with the deep satisfaction of a creature who had mastered the art of domesticating humans. Four separate households believed they were his primary residence, ensuring a constant rotation of meals and affection that maintained both his impressive physique and his smug expression of utter contentment.'
+      }
+    },
+    textSize: 'base',
+    textSizes: [
+      { value: 'xs', label: 'XS (10px / 0.625rem)' },
+      { value: 'sm', label: 'SM (12px / 0.75rem)' },
+      { value: 'base', label: 'Base (16px / 1rem)' },
+      { value: 'lg', label: 'LG (20px / 1.25rem)' },
+      { value: 'xl', label: 'XL (24px / 1.5rem)' },
+      { value: '2xl', label: '2XL (32px / 2rem)' },
+      { value: '3xl', label: '3XL (40px / 2.5rem)' },
+      { value: '4xl', label: '4XL (48px / 3rem)' },
+      { value: '5xl', label: '5XL (64px / 4rem)' },
+      { value: '6xl', label: '6XL (80px / 5rem)' },
+      { value: '7xl', label: '7XL (96px / 6rem)' },
+      { value: '8xl', label: '8XL (112px / 7rem)' },
+      { value: '9xl', label: '9XL (128px / 8rem)' }
+    ],
+    fontFamily: 'mono',
+    fontFamilies: [
+        { value: 'sans', label: 'Sans' },
+        { value: 'serif', label: 'Serif' },
+        { value: 'mono', label: 'Mono' }
+    ],
+     settingsOpen: false,
+  }"
+  class="bg-orange-800 text-orange-100 font-mono p-8"
+  :class="'font-' + fontFamily"
+>
+  <div class="max-w-4xl mx-auto space-y-12">
+    <section class="bg-orange-900/80 backdrop-blur-sm p-4 rounded-lg shadow-lg border-2 border-orange-700 sticky top-4 z-10 transition-all duration-200"
+         :class="{'pb-6': settingsOpen}">
+    <button @click="settingsOpen = !settingsOpen" 
+            class="w-full flex justify-between items-center text-orange-300 hover:text-orange-200">
+        <h2 class="text-2xl font-bold">Display Settings</h2>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 transition-transform duration-200" 
+             :class="{'rotate-180': settingsOpen}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+        </svg>
+    </button>
+
+    <div x-show="settingsOpen" x-transition class="mt-4 space-y-4">
+        <!-- Text Size Controls -->
+        <div>
+            <h3 class="text-lg font-bold mb-2 text-orange-300">Text Size</h3>
+            <div class="flex flex-wrap gap-2">
+                <template x-for="size in textSizes">
+                    <button
+                        @click="textSize = size.value"
+                        class="px-4 py-2 rounded border"
+                        :class="{
+                            'bg-orange-700/80 border-orange-600 text-orange-100': textSize === size.value,
+                            'bg-orange-800/80 border-orange-700 text-orange-200 hover:bg-orange-700/80': textSize !== size.value
+                        }"
+                        x-text="size.label"
+                    ></button>
+                </template>
+            </div>
+        </div>
+
+        <!-- Font Family Controls -->
+        <div>
+            <h3 class="text-lg font-bold mb-2 text-orange-300">Font Family</h3>
+            <div class="flex flex-wrap gap-2">
+                <template x-for="font in fontFamilies">
+                    <button
+                        @click="fontFamily = font.value"
+                        class="px-4 py-2 rounded border"
+                        :class="{
+                            'bg-orange-700/80 border-orange-600 text-orange-100': fontFamily === font.value,
+                            'bg-orange-800/80 border-orange-700 text-orange-200 hover:bg-orange-700/80': fontFamily !== font.value
+                        }"
+                        x-text="font.label"
+                    ></button>
+                </template>
+            </div>
+        </div>
+    </div>
+</section>
+
+    <!-- Alphabets Section -->
+    <section class="bg-orange-900 p-6 rounded-lg shadow-lg border-2 border-orange-700">
+      <h2 class="text-2xl font-bold mb-4 text-orange-300">Alphabets</h2>
+      <div class="grid grid-cols-1 gap-4 overflow-auto">
+        <template x-for="([key, value]) in Object.entries(content.alphabets)">
+          <div class="bg-orange-800 p-4 rounded border border-orange-700">
+            <h3 class="font-bold text-orange-200" :class="'text-' + textSize" x-text="key.replace('_', ' ')"></h3>
+            <p class="text-orange-100" :class="'text-' + textSize" x-text="value"></p>
+          </div>
+        </template>
+      </div>
+    </section>
+
+    <!-- Words Section -->
+    <section class="bg-orange-900 p-6 rounded-lg shadow-lg border-2 border-orange-700">
+      <h2 class="text-2xl font-bold mb-4 text-orange-300">Words</h2>
+      <div class="grid grid-cols-1 gap-4">
+        <template x-for="([key, value]) in Object.entries(content.words)">
+          <div class="bg-orange-800 p-4 rounded border border-orange-700">
+            <h3 class="font-bold text-orange-200" :class="'text-' + textSize" x-text="key.replace('_', ' ')"></h3>
+            <p class="text-orange-100" :class="'text-' + textSize" x-text="value"></p>
+          </div>
+        </template>
+      </div>
+    </section>
+
+    <!-- Sentences Section -->
+    <section class="bg-orange-900 p-6 rounded-lg shadow-lg border-2 border-orange-700">
+      <h2 class="text-2xl font-bold mb-4 text-orange-300">Sentences</h2>
+      <div class="grid grid-cols-1 gap-4">
+        <template x-for="([key, value]) in Object.entries(content.sentences)">
+          <div class="bg-orange-800 p-4 rounded border border-orange-700">
+            <h3 class="font-bold text-orange-200" :class="'text-' + textSize" x-text="key.replace('_', ' ')"></h3>
+            <p class="text-orange-100" :class="'text-' + textSize" x-text="value"></p>
+          </div>
+        </template>
+      </div>
+    </section>
+
+    <!-- Paragraphs Section -->
+    <section class="bg-orange-900 p-6 rounded-lg shadow-lg border-2 border-orange-700">
+      <h2 class="text-2xl font-bold mb-4 text-orange-300">Paragraphs</h2>
+      <div class="space-y-6">
+        <template x-for="([key, value]) in Object.entries(content.paragraphs)">
+          <div class="bg-orange-800 p-4 rounded border border-orange-700">
+            <h3 class="font-bold text-orange-200 mb-2" :class="'text-' + textSize" x-text="key + ' paragraph'"></h3>
+            <p class="text-orange-100" :class="'text-' + textSize" x-text="value"></p>
+          </div>
+        </template>
+      </div>
+    </section>
+  </div>
+</body>
+</html>
