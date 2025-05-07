@@ -5,6 +5,7 @@
 - ~~draw figures~~
 -->
 <html lang="en">
+
   <head>
     <meta charset="UTF-8" />
     <title>Intro to various text content</title>
@@ -16,8 +17,7 @@
     <script src="../tailwind_v4.1.5.js" type="module"></script>
   </head>
 
-  <body 
-  x-data="{
+  <body x-data="{
     content: {
       'alphabets': {
         '1_character': 'I',
@@ -65,119 +65,244 @@
       { value: '8xl', label: '8XL (112px / 7rem)' },
       { value: '9xl', label: '9XL (128px / 8rem)' }
     ],
-    fontFamily: 'mono',
+    fontFamily: 'serif',
     fontFamilies: [
         { value: 'sans', label: 'Sans' },
         { value: 'serif', label: 'Serif' },
         { value: 'mono', label: 'Mono' }
     ],
-     settingsOpen: false,
-  }"
-  class="bg-orange-800 text-orange-100 font-mono p-8"
-  :class="'font-' + fontFamily"
->
-  <div class="max-w-4xl mx-auto space-y-12">
-    <section class="bg-orange-900/80 backdrop-blur-sm p-4 rounded-lg shadow-lg border-2 border-orange-700 sticky top-4 z-10 transition-all duration-200"
-         :class="{'pb-6': settingsOpen}">
-    <button @click="settingsOpen = !settingsOpen" 
-            class="w-full flex justify-between items-center text-orange-300 hover:text-orange-200">
-        <h2 class="text-2xl font-bold">Display Settings</h2>
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 transition-transform duration-200" 
-             :class="{'rotate-180': settingsOpen}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-        </svg>
-    </button>
+    settingsOpen: false,
+    toastMessage: '',
+    toastVisible: false,
+    showToast(message) {
+      this.toastMessage = message;
+      this.toastVisible = true;
+      setTimeout(() => this.toastVisible = false, 2000);
+    },
+    
+    increaseTextSize() {
+      const currentIndex = this.textSizes.findIndex(size => size.value === this.textSize);
+      if (currentIndex < this.textSizes.length - 1) {
+        this.textSize = this.textSizes[currentIndex + 1].value;
+        this.showToast(`Text size: ${this.textSize.toUpperCase()}`);
+      }
+    },
+    
+    decreaseTextSize() {
+      const currentIndex = this.textSizes.findIndex(size => size.value === this.textSize);
+      if (currentIndex > 0) {
+        this.textSize = this.textSizes[currentIndex - 1].value;
+        this.showToast(`Text size: ${this.textSize.toUpperCase()}`);
+      }
+    },
+    
+    setFontFamily(font) {
+      this.fontFamily = font;
+      this.showToast(`Font: ${font.charAt(0).toUpperCase() + font.slice(1)}`);
+    },
+    
+    // Initialize keyboard listeners
+    init() {
+      document.addEventListener('keydown', (event) => {
+        if (event.key === '+' || event.key === '=') {
+          event.preventDefault();
+          this.increaseTextSize();
+        }
+        else if (event.key === '-' || event.key === '_') {
+          event.preventDefault();
+          this.decreaseTextSize();
+        }
+        else if (event.key === '1') {
+          this.setFontFamily('sans');
+        }
+        else if (event.key === '2') {
+          this.setFontFamily('serif');
+        }
+        else if (event.key === '3') {
+          this.setFontFamily('mono');
+        }
+      });
+    }
+  }" class="bg-orange-800 text-orange-100 font-mono p-8"
+    :class="'font-' + fontFamily">
+    <div class="max-w-4xl mx-auto space-y-12">
+      <section
+        class="bg-orange-900/80 backdrop-blur-sm p-4 rounded-lg shadow-lg border-2 border-orange-700 lg:sticky lg:top-4 lg:z-10 transition-all duration-200"
+        @click.away="settingsOpen = false" :class="{'pb-6': settingsOpen}">
+        <button @click="settingsOpen = !settingsOpen"
+          class="w-full flex justify-between items-center text-orange-300 hover:text-orange-200">
+          <h2 class="text-2xl font-bold">Display Settings</h2>
+          <svg xmlns="http://www.w3.org/2000/svg"
+            class="h-6 w-6 transition-transform duration-200"
+            :class="{'rotate-180': settingsOpen}" fill="none"
+            viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
 
-    <div x-show="settingsOpen" x-transition class="mt-4 space-y-4">
-        <!-- Text Size Controls -->
-        <div>
+        <div x-show="settingsOpen" x-transition class="mt-4 space-y-4">
+          <!-- Text Size Controls -->
+          <div>
             <h3 class="text-lg font-bold mb-2 text-orange-300">Text Size</h3>
+            <p class="text-sm mb-4 hidden lg:block"> use keyboard keys "+" and
+              "-" as shortcuts, no need to press shift.
+            </p>
             <div class="flex flex-wrap gap-2">
-                <template x-for="size in textSizes">
-                    <button
-                        @click="textSize = size.value"
-                        class="px-4 py-2 rounded border"
-                        :class="{
+              <template x-for="size in textSizes">
+                <button @click="textSize = size.value"
+                  class="px-4 py-2 rounded border" :class="{
                             'bg-orange-700/80 border-orange-600 text-orange-100': textSize === size.value,
                             'bg-orange-800/80 border-orange-700 text-orange-200 hover:bg-orange-700/80': textSize !== size.value
-                        }"
-                        x-text="size.label"
-                    ></button>
-                </template>
+                        }" x-text="size.label"></button>
+              </template>
             </div>
-        </div>
+          </div>
 
-        <!-- Font Family Controls -->
-        <div>
+          <!-- Font Family Controls -->
+          <div>
             <h3 class="text-lg font-bold mb-2 text-orange-300">Font Family</h3>
+            <p class="text-sm mb-4 hidden lg:block"> use keyboard keys "1", "2",
+              "3" as shortcuts</p>
             <div class="flex flex-wrap gap-2">
-                <template x-for="font in fontFamilies">
-                    <button
-                        @click="fontFamily = font.value"
-                        class="px-4 py-2 rounded border"
-                        :class="{
+              <template x-for="font in fontFamilies">
+                <button @click="fontFamily = font.value"
+                  class="px-4 py-2 rounded border" :class="{
                             'bg-orange-700/80 border-orange-600 text-orange-100': fontFamily === font.value,
                             'bg-orange-800/80 border-orange-700 text-orange-200 hover:bg-orange-700/80': fontFamily !== font.value
-                        }"
-                        x-text="font.label"
-                    ></button>
-                </template>
+                        }" x-text="font.label"></button>
+              </template>
             </div>
+          </div>
         </div>
-    </div>
-</section>
+      </section>
 
-    <!-- Alphabets Section -->
-    <section class="bg-orange-900 p-6 rounded-lg shadow-lg border-2 border-orange-700">
-      <h2 class="text-2xl font-bold mb-4 text-orange-300">Alphabets</h2>
-      <div class="grid grid-cols-1 gap-4 overflow-auto">
-        <template x-for="([key, value]) in Object.entries(content.alphabets)">
-          <div class="bg-orange-800 p-4 rounded border border-orange-700">
-            <h3 class="font-bold text-orange-200" :class="'text-' + textSize" x-text="key.replace('_', ' ')"></h3>
-            <p class="text-orange-100" :class="'text-' + textSize" x-text="value"></p>
+      <!-- Alphabets Section -->
+      <section
+        class="bg-orange-900 p-6 rounded-lg shadow-lg border-2 border-orange-700"
+        x-data="{ isOpen: true }">
+        <div class="flex justify-between items-center cursor-pointer"
+          @click="isOpen = !isOpen">
+          <h2 class="text-2xl font-bold text-orange-300">Alphabets</h2>
+          <svg xmlns="http://www.w3.org/2000/svg"
+            class="h-6 w-6 text-orange-300 transition-transform"
+            x-bind:class="{ 'rotate-180': !isOpen }" fill="none"
+            viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </div>
+        <div x-show="isOpen" x-transition>
+          <div class="grid grid-cols-1 gap-4 overflow-auto mt-4">
+            <template
+              x-for="([key, value]) in Object.entries(content.alphabets)">
+              <div class="bg-orange-800 p-4 rounded border border-orange-700">
+                <h3 class="font-bold text-orange-200"
+                  :class="'text-' + textSize"
+                  x-text="key.replace('_', ' ')"></h3>
+                <p class="text-orange-100" :class="'text-' + textSize"
+                  x-text="value"></p>
+              </div>
+            </template>
           </div>
-        </template>
-      </div>
-    </section>
+        </div>
+      </section>
 
-    <!-- Words Section -->
-    <section class="bg-orange-900 p-6 rounded-lg shadow-lg border-2 border-orange-700">
-      <h2 class="text-2xl font-bold mb-4 text-orange-300">Words</h2>
-      <div class="grid grid-cols-1 gap-4">
-        <template x-for="([key, value]) in Object.entries(content.words)">
-          <div class="bg-orange-800 p-4 rounded border border-orange-700">
-            <h3 class="font-bold text-orange-200" :class="'text-' + textSize" x-text="key.replace('_', ' ')"></h3>
-            <p class="text-orange-100" :class="'text-' + textSize" x-text="value"></p>
+      <!-- Words Section -->
+      <section
+        class="bg-orange-900 p-6 rounded-lg shadow-lg border-2 border-orange-700"
+        x-data="{ isOpen: true }">
+        <div class="flex justify-between items-center cursor-pointer"
+          @click="isOpen = !isOpen">
+          <h2 class="text-2xl font-bold text-orange-300">Words</h2>
+          <svg xmlns="http://www.w3.org/2000/svg"
+            class="h-6 w-6 text-orange-300 transition-transform"
+            x-bind:class="{ 'rotate-180': !isOpen }" fill="none"
+            viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </div>
+        <div x-show="isOpen" x-transition>
+          <div class="grid grid-cols-1 gap-4 mt-4">
+            <template x-for="([key, value]) in Object.entries(content.words)">
+              <div class="bg-orange-800 p-4 rounded border border-orange-700">
+                <h3 class="font-bold text-orange-200"
+                  :class="'text-' + textSize"
+                  x-text="key.replace('_', ' ')"></h3>
+                <p class="text-orange-100" :class="'text-' + textSize"
+                  x-text="value"></p>
+              </div>
+            </template>
           </div>
-        </template>
-      </div>
-    </section>
+        </div>
+      </section>
 
-    <!-- Sentences Section -->
-    <section class="bg-orange-900 p-6 rounded-lg shadow-lg border-2 border-orange-700">
-      <h2 class="text-2xl font-bold mb-4 text-orange-300">Sentences</h2>
-      <div class="grid grid-cols-1 gap-4">
-        <template x-for="([key, value]) in Object.entries(content.sentences)">
-          <div class="bg-orange-800 p-4 rounded border border-orange-700">
-            <h3 class="font-bold text-orange-200" :class="'text-' + textSize" x-text="key.replace('_', ' ')"></h3>
-            <p class="text-orange-100" :class="'text-' + textSize" x-text="value"></p>
+      <!-- Sentences Section -->
+      <section
+        class="bg-orange-900 p-6 rounded-lg shadow-lg border-2 border-orange-700"
+        x-data="{ isOpen: true }">
+        <div class="flex justify-between items-center cursor-pointer"
+          @click="isOpen = !isOpen">
+          <h2 class="text-2xl font-bold text-orange-300">Sentences</h2>
+          <svg xmlns="http://www.w3.org/2000/svg"
+            class="h-6 w-6 text-orange-300 transition-transform"
+            x-bind:class="{ 'rotate-180': !isOpen }" fill="none"
+            viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </div>
+        <div x-show="isOpen" x-transition>
+          <div class="grid grid-cols-1 gap-4 mt-4">
+            <template
+              x-for="([key, value]) in Object.entries(content.sentences)">
+              <div class="bg-orange-800 p-4 rounded border border-orange-700">
+                <h3 class="font-bold text-orange-200"
+                  :class="'text-' + textSize"
+                  x-text="key.replace('_', ' ')"></h3>
+                <p class="text-orange-100" :class="'text-' + textSize"
+                  x-text="value"></p>
+              </div>
+            </template>
           </div>
-        </template>
-      </div>
-    </section>
+        </div>
+      </section>
 
-    <!-- Paragraphs Section -->
-    <section class="bg-orange-900 p-6 rounded-lg shadow-lg border-2 border-orange-700">
-      <h2 class="text-2xl font-bold mb-4 text-orange-300">Paragraphs</h2>
-      <div class="space-y-6">
-        <template x-for="([key, value]) in Object.entries(content.paragraphs)">
-          <div class="bg-orange-800 p-4 rounded border border-orange-700">
-            <h3 class="font-bold text-orange-200 mb-2" :class="'text-' + textSize" x-text="key + ' paragraph'"></h3>
-            <p class="text-orange-100" :class="'text-' + textSize" x-text="value"></p>
+      <!-- Paragraphs Section -->
+      <section
+        class="bg-orange-900 p-6 rounded-lg shadow-lg border-2 border-orange-700"
+        x-data="{ isOpen: true }">
+        <div class="flex justify-between items-center cursor-pointer"
+          @click="isOpen = !isOpen">
+          <h2 class="text-2xl font-bold text-orange-300">Paragraphs</h2>
+          <svg xmlns="http://www.w3.org/2000/svg"
+            class="h-6 w-6 text-orange-300 transition-transform"
+            x-bind:class="{ 'rotate-180': !isOpen }" fill="none"
+            viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </div>
+        <div x-show="isOpen" x-transition>
+          <div class="space-y-6 mt-4">
+            <template
+              x-for="([key, value]) in Object.entries(content.paragraphs)">
+              <div class="bg-orange-800 p-4 rounded border border-orange-700">
+                <h3 class="font-bold text-orange-200 mb-2"
+                  :class="'text-' + textSize" x-text="key + ' paragraph'"></h3>
+                <p class="text-orange-100" :class="'text-' + textSize"
+                  x-text="value"></p>
+              </div>
+            </template>
           </div>
-        </template>
+        </div>
+      </section>
+      <!-- Toast Notification -->
+      <div x-show="toastVisible" x-transition
+        class="fixed bottom-4 right-4 bg-orange-700/90 text-orange-100 px-4 py-2 rounded-lg shadow-lg border border-orange-600">
+        <span x-text="toastMessage"></span>
       </div>
-    </section>
-  </div>
-</body>
-</html>
+    </body>
+
+  </html>
