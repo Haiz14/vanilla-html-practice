@@ -1,7 +1,8 @@
 <!doctype html>
 <!-- 
-- create notes list
-- create ranges 
+- ~~create notes list~~
+- ~~create ranges ~~
+- ~~draw figures~~
 -->
 <html lang="en">
   <head>
@@ -18,6 +19,7 @@
   <body x-data="{
     initialPixel: 200,
     selectedNote: 2,
+    showUnison: false,
     ratios:{
         octave: '1:2',
         majorSeventh: '8:15',
@@ -66,6 +68,10 @@
     <label for="initialPixel"> Initial Pixel</label>
   <input type="number" x-model="initialPixel">
   </div>
+              <div class="flex items-center gap-2">
+                  <input type="checkbox" x-model="showUnison" />
+                <span class="text-xs font-medium">Show Unison</span>
+              </div>
   <div>
 
     <template
@@ -73,11 +79,18 @@
     >
 
         <div>
-        <span x-text="id" class="font-bold"></span>
-        <span x-text="value" class="text-gray-600"></span>
+          <span x-text="id" class="font-bold"></span>
+          <span x-text="value" class="text-gray-600"></span>
 
-        <div :class="'w-[' + value * initialPixel + 'px] h-[' + initialPixel + 'px]'  " class="bg-black mt-2 overflow-x"
-        ></div>
+          <div :class="showUnison? 'bg-gray-300 h-[' + value * initialPixel + 'px] w-[' + value * initialPixel + 'px]' : ''">
+
+            <div :class="'w-[' + value * initialPixel + 'px] h-[' + initialPixel + 'px]'  " class="bg-gray-600/50 mt-2 overflow-x"
+            >
+
+              <div :class="'bg-gray-950/70 w-[' + initialPixel + 'px] ' + 'h-['+  initialPixel+'px]'">
+              </div>
+            </div>
+          </div>
         </div>
     </template>
   </div>
