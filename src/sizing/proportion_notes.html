@@ -17,8 +17,8 @@
   </head>
 
   <body x-data="{
-    initialPixel: 200,
-    selectedNote: 2,
+    initialPixel: 100,
+    selectedNote: 1,
     showUnison: false,
     ratios:{
         octave: '1:2',
@@ -59,41 +59,44 @@
 
   }">
 
-  <div>
+  <div class="flex flex-wrap gap-4">
+    <div>
 
-  <label for="selectedNote"> Selected Note</label>
-  <input type="number" x-model="selectedNote">
+
+      <label for="selectedNote"> Selected Note</label>
+      <input type="number" class="border-2" x-model="selectedNote">
+    </div>
+    <div>
+      <label for="initialPixel"> Initial Pixel</label>
+      <input type="number" class="border-2" x-model="initialPixel">
+    </div>
+    <div class="flex items-center gap-2">
+        <input type="checkbox" x-model="showUnison" />
+        <span class="text-xs font-medium">Show Unison</span>
+    </div>
+    </div>
+
   </div>
-  <div>
-    <label for="initialPixel"> Initial Pixel</label>
-  <input type="number" x-model="initialPixel">
-  </div>
-              <div class="flex items-center gap-2">
-                  <input type="checkbox" x-model="showUnison" />
-                <span class="text-xs font-medium">Show Unison</span>
-              </div>
-  <div>
 
-    <template
-      x-for="[id, value] in Object.entries(getRangesNotes)"
-    >
+  <template
+    x-for="[id, value] in Object.entries(getRangesNotes)"
+  >
 
-        <div>
-          <span x-text="id" class="font-bold"></span>
-          <span x-text="value" class="text-gray-600"></span>
+    <div>
+      <span x-text="id" class="font-bold"></span>
+      <span x-text="value" class="text-gray-600"></span>
 
-          <div :class="showUnison? 'bg-gray-300 h-[' + value * initialPixel + 'px] w-[' + value * initialPixel + 'px]' : ''">
+      <div :class="showUnison? 'bg-gray-300 h-[' + value * initialPixel + 'px] w-[' + value * initialPixel + 'px]' : ''">
 
-            <div :class="'w-[' + value * initialPixel + 'px] h-[' + initialPixel + 'px]'  " class="bg-gray-600/50 mt-2 overflow-x"
-            >
+        <div :class="'w-[' + value * initialPixel + 'px] h-[' + initialPixel + 'px]'  " class="bg-gray-600/50 mt-2 overflow-x"
+        >
 
-              <div :class="'bg-gray-950/70 w-[' + initialPixel + 'px] ' + 'h-['+  initialPixel+'px]'">
-              </div>
-            </div>
+          <div :class="'bg-gray-950/70 w-[' + initialPixel + 'px] ' + 'h-['+  initialPixel+'px]'">
           </div>
         </div>
-    </template>
-  </div>
+      </div>
+    </div>
+  </template>
     
   </body>
 </html>
