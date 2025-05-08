@@ -1,0 +1,152 @@
+
+<!doctype html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8" />
+        <title>Container Proportions and Calculations</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta property="og:title" content="Container Proportions and Calculations" />
+        <meta property="og:description"
+            content="Visualize and calculate what different proportions would look like on a aspect ratio and aboslute value." />
+        <meta property="og:type" content="app" />
+
+        <script defer src="../alpine_v3.14.9.js" type="module"></script>
+        <script src="../tailwind_v4.1.5.js" type="module"></script>
+    </head>
+    <body x-data="{
+        constraints: {
+            smallest_potrait: [320, 464],
+            normal_potrait: [360, 644],
+            smallest_landscape: [1280, 551],
+            normal_landscape: [1440, 929],
+            big_landscape: [2560, 1858],
+        },
+        ratios:{
+            octave: '1:2',
+            majorSeventh: '8:15',
+            minorSeventh: '9:16',
+            majorSixth: '3:5',
+            minorSixth: '5:8',
+            majorFifth: '2:3',
+            minorFifth: '1:1.414',
+            majorFourth: '1:1.414',
+            minorFourth: '3:4',
+            majorThird: '4:5',
+            minorThird: '5:6',
+            majorSecond: '8:9',
+            minorSecond: '15:16',
+            unison: '1:1',
+        },
+        findClosestRatio(width, height) {
+            // Calculate both possible ratios
+            const ratio1 = width / height;
+            const ratio2 = height / width;
+            
+            // Convert ratio strings to numeric values
+            const ratioValues = Object.entries(this.ratios).map(([name, ratio]) => {
+                const [a, b] = ratio.split(':').map(Number);
+                return {
+                    name,
+                    value: b / a,
+                    ratioString: ratio
+                };
+            });
+            
+            // Find closest match for both orientations
+            const findMatch = (targetRatio) => {
+                let closest = null;
+                let minDiff = Infinity;
+                
+                for (const ratio of ratioValues) {
+                    const diff = Math.abs(targetRatio - ratio.value);
+                    if (diff < minDiff) {
+                        minDiff = diff;
+                        closest = ratio;
+                    }
+                }
+                
+                return {
+                    ...closest,
+                    actualRatio: targetRatio,
+                    ratioType: targetRatio > 1 ? 'W:H' : 'H:W',
+                    formattedRatio: targetRatio > 1 ? 
+                        `1:${(1/targetRatio).toFixed(3)}` : 
+                        `${targetRatio.toFixed(3)}:1`
+                };
+            };
+            
+            const match1 = findMatch(ratio1);
+            const match2 = findMatch(ratio2);
+            
+            // Return the match with smaller difference
+            const diff1 = Math.abs(ratio1 - match1.value);
+            const diff2 = Math.abs(ratio2 - match2.value);
+            
+            return diff1 < diff2 ? match1 : match2;
+        },
+        getRatioInfo() {
+            const allRatios = [];
+            
+            for (const [name, [width, height]] of Object.entries(this.constraints)) {
+                const ratioInfo = this.findClosestRatio(width, height);
+                allRatios.push({
+                    name,
+                    width,
+                    height,
+                    ratioName: ratioInfo.name,
+                    ratioValue: ratioInfo.ratioString,
+                    calculatedRatio: ratioInfo.formattedRatio,
+                    ratioType: ratioInfo.ratioType,
+                    matchQuality: (1 - Math.abs(
+                        (width/height) - 
+                        (ratioInfo.value)
+                    ).toFixed(3))
+                });
+            }
+            
+            return allRatios;
+        }
+  }" class="bg-purple-900 text-purple-100 min-h-screen p-8 font-mono">
+  <div class="max-w-6xl mx-auto">
+    <h1 class="text-5xl font-black mb-10 text-purple-300 border-b-4 border-purple-700 pb-4 tracking-tighter">RATIO MATCH ANALYSIS</h1>
+    
+    <div class="space-y-10">
+      <!-- Ratio Matching Results -->
+      <div class="bg-purple-800 p-6 rounded-lg shadow-2xl border-4 border-purple-700">
+        <h2 class="text-3xl font-bold mb-6 text-purple-200">SCREEN RATIO MATCHES</h2>
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <template x-for="item in getRatioInfo()" :key="item.name">
+            <div class="bg-purple-950 p-5 rounded border-2 border-purple-700">
+              <h3 class="font-black text-lg text-purple-400 uppercase" x-text="item.name.replace(/_/g, ' ')"></h3>
+              <p class="text-2xl my-3 font-mono" x-text="`${item.width} × ${item.height}`"></p>
+              
+              <div class="space-y-2 mt-4">
+                <div class="flex justify-between">
+                  <span class="text-purple-300">Calculated:</span>
+                  <span class="font-mono text-purple-200" x-text="item.calculatedRatio"></span>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+
+      <!-- Ratio Reference -->
+      <div class="bg-purple-800 p-6 rounded-lg shadow-2xl border-4 border-purple-700">
+        <h2 class="text-3xl font-bold mb-6 text-purple-200">RATIO REFERENCE</h2>
+        <div class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <template x-for="[name, ratio] in Object.entries(ratios)">
+            <div class="bg-purple-950 p-4 rounded border border-purple-700">
+              <h3 class="font-bold text-purple-400 capitalize" x-text="name.replace(/([A-Z])/g, ' $1').trim()"></h3>
+              <p class="text-xl font-mono text-purple-200" x-text="ratio"></p>
+              <p class="text-sm text-purple-500 mt-1" x-text="`Value: ${(ratio.split(':')[1]/ratio.split(':')[0]).toFixed(4) - 1}`"></p>
+            </div>
+          </template>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
