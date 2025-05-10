@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Unit Ratio Calc</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta property="og:title" content="Unit Ratio Calc" />
+    <meta property="og:type" content="website" />
+
+    <script defer src="../alpine_v3.14.9"></script>
+    <script src="../tailwind_v4.1.5"></script>
+  </head>
+  <body
+    class="bg-pink-100 text-gray-900 mx-3 lg:max-w-[700px] lg:ml-12 lg:mr-6"
+    x-data="{
+        unitRaw: 1,
+        ratios:{
+            octave: '1:2',
+            majorSeventh: '8:15',
+            minorSeventh: '9:16',
+            majorSixth: '3:5',
+            minorSixth: '5:8',
+            majorFifth: '2:3',
+            minorFifth: '1:1.414',
+            majorFourth: '1:1.414',
+            minorFourth: '3:4',
+            majorThird: '4:5',
+            minorThird: '5:6',
+            majorSecond: '8:9',
+            minorSecond: '15:16',
+            unison: '1:1',
+        },
+        get getRatioScale() {
+          const ratioValues = Object.entries(this.ratios).map(([name, ratio]) => {
+            const [a, b] = ratio.split(':').map(Number);
+            const ratioValue = b / a - 1;
+            const pxValue = this.unitRaw * ratioValue;
+            const remValue = pxValue / 16;
+
+            return {
+              name,
+              ratio: `${a}:${b}`,
+              pxValue: pxValue.toFixed(2),
+              remValue: remValue.toFixed(2),
+              ratioValue: ratioValue.toFixed(4)
+            };
+          });
+
+          return ratioValues;
+        },
+      }"
+  >
+ <div class="space-y-6 lg:space-y-12 font-mono">
+  <!-- Title Section -->
+  <div class="space-y-1">
+    <h1 class="text-3xl font-bold tracking-tight text-gray-900">
+      Ratio Calc
+    </h1>
+    <p class="text-sm text-gray-700 italic">(just-intonation)</p>
+  </div>
+
+  <!-- Input Section -->
+  <div class="space-y-2">
+    <label for="unitInput" class="block text-sm font-medium text-gray-900">
+      Base Value
+    </label>
+    <input
+      id="unitInput"
+      type="number"
+      x-model.number="unitRaw"
+      class="w-full max-w-[330px] h-10 px-3 border-2 border-black bg-pink-50 
+             focus:ring-2 focus:ring-pink-300 focus:outline-none"
+    />
+  </div>
+
+  <!-- Ratios Grid -->
+  <div class="flex flex-wrap gap-4">
+    <template x-for="ratio in getRatioScale" :key="ratio.name">
+      <div 
+        class="flex flex-col p-4 border-2 border-pink-700 min-w-[300px]
+               hover:bg-pink-200 transition-colors shadow-sm
+               odd:bg-pink-100 even:bg-pink-50"
+      >
+        <!-- Header Row -->
+        <div class="flex justify-between items-baseline mb-2">
+          <span class="text-xs font-light uppercase tracking-wide" x-text="ratio.name"></span>
+          <span class="text-xs font-mono bg-pink-200 px-2 py-1 rounded" 
+                x-text="`${ratio.ratioValue}x`"></span>
+        </div>
+        
+        <!-- Values Row -->
+        <div class="flex justify-between items-baseline">
+          <div class="space-y-1">
+            <p class="text-xl font-mono font-semibold" x-text="`${ratio.remValue}rem`"></p>
+          </div>
+          <div class="space-y-1 text-right">
+            <p class="text-xl font-mono font-semibold" x-text="`${ratio.pxValue}px`"></p>
+          </div>
+        </div>
+      </div>
+    </template>
+  </div>
+</div> 
+  </body>
+</html>
