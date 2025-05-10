@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Sizes App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta property="og:title" content="Sizes App" />
+    <meta property="og:type" content="website" />
+
+    <script defer src="/alpine_v3.14.9"></script>
+    <script src="/tailwind_v4.1.5"></script>
+<style>
+        /* Basic styling for the visual bars */
+        .scale-bar {
+            transition: width 0.3s ease-in-out;
+        }
+        /* Ensure monospace font renders consistently */
+        .font-mono {
+             font-feature-settings: "tnum"; /* Tabular nums */
+        }
+    </style>
+  </head>
+
+<body class="bg-gray-100 font-sans p-6 md:p-10">
+	<p x-data='{message: "i love me"}' x-text="message"></p>
+	<div x-data="{counter:0}">
+		<button x-on:click="counter++" >click</button>
+		<p x-text="counter"></p>
+	</div>
+	<div x-data="{
+	search: '',
+	items: ['hia', 'hello23', 'mearh'],
+	get filteredItems() {
+		return this.items.filter(
+			i => i.startsWith(this.search)
+		)
+	},
+		}">
+		<input type="text" x-model="search" placeholder="search">
+		<ul>
+			<template x-for="item in filteredItems" :key="item">
+				<li x-text="item"></li>
+			</template>
+		</ul>
+
+	<p x-text="search"></p>
+	</div>
+	<div x-data="{hi: 12}">
+		<p class="" x-text="hi"></p>
+	</div>
+	<div x-data="{ 
+		statuses: ['open', 'closed', 'archived'],
+	search: '',
+	items: ['abc', 'abcd', 'abcde, 'efg', 'efgh'],
+
+		}">
+    <template x-for="status in statuses">
+        <div x-text="status"></div>
+    </template>
+</div>
+</body>
+
+
+</html>
