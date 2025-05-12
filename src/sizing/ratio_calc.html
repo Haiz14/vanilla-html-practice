@@ -12,7 +12,7 @@
     <script src="../tailwind_v4.1.5.js" type="module"></script>
   </head>
   <body
-    class="bg-pink-100 text-gray-900 mx-3 lg:max-w-[700px] lg:ml-12 lg:mr-6"
+    class="bg-pink-100 text-gray-900 my-4 lg:my-8 ml-6 lg:ml-12 mr-4 max-w-[1400px] lg:mr-6"
     x-data="{
         unitRaw: 1,
         ratios:{
@@ -62,7 +62,7 @@
 
   <!-- Input Section -->
   <div class="space-y-2">
-    <label for="unitInput" class="block text-sm font-medium text-gray-900">
+    <label for="unitInput" class="block text-lg font-medium text-gray-900">
       Base Value
     </label>
     <input
@@ -95,7 +95,7 @@
             <p class="text-xl font-mono font-semibold" x-text="`${ratio.remValue}rem`"></p>
           </div>
           <div class="space-y-1 text-right">
-            <p class="text-xl font-mono font-semibold" x-text="`${ratio.pxValue}px`"></p>
+            <p class="text-xl font-mono font-thin" x-text="`${ratio.pxValue}px`"></p>
           </div>
         </div>
       </div>
