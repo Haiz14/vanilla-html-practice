@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RP Exodus - Write & Roleplay</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@300;400;600&family=Zilla+Slab:wght@400;500&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        purple: {
+                            light: '#F3E8FF',
+                            medium: '#D8B4FE',
+                            dark: '#9333EA',
+                        },
+                        pink: {
+                            pastel: '#FCE7F3',
+                        }
+                    },
+                    fontFamily: {
+                        heading: ['Zilla Slab', 'serif'],
+                        body: ['Roboto Slab', 'serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        .brutal-border {
+            border: 5px solid #D8B4FE;
+            box-shadow: 8px 8px 0px rgba(216, 180, 254, 0.15);
+        }
+        .brutal-btn {
+            border: 3px solid #9333EA;
+            box-shadow: 4px 4px 0px rgba(147, 51, 234, 0.1);
+            transition: all 0.2s ease;
+        }
+        .brutal-btn:hover {
+            transform: translate(1px, 1px);
+            box-shadow: 3px 3px 0px rgba(147, 51, 234, 0.1);
+            background-color: #F3E8FF;
+        }
+        .divider {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #D8B4FE, transparent);
+        }
+    </style>
+</head>
+<body class="bg-purple-white min-h-screen font-body flex items-center justify-center p-4">
+    <div class="brutal-border bg-purple-light max-w-2xl w-full p-8 md:p-12 rounded-sm">
+        <!-- Header -->
+        <div class="mb-8 text-center">
+            <h1 class="font-heading text-4xl md:text-5xl font-medium text-purple-dark mb-4 tracking-tight">RP EXODUS</h1>
+            <div class="divider w-3/4 mx-auto mb-6"></div>
+            <p class="text-lg text-purple-dark opacity-90">Write & Roleplay with 450+ Writers</p>
+        </div>
+
+        <!-- Description Box -->
+        <div class="bg-purple-medium bg-opacity-30 p-6 mb-8 rounded-sm">
+            <h2 class="font-heading text-xl font-semibold text-purple-dark mb-2">Welcome to Our Community</h2>
+            <p class="text-purple-dark text-opacity-90">
+                A cozy Discord community for laid-back storytelling, novels, and fun chats.
+            </p>
+        </div>
+
+        <!-- CTA Section -->
+        <div class="text-center">
+            <h3 class="font-heading text-2xl font-medium text-purple-dark mb-5 opacity-95">Ready to Join Us?</h3>
+            <a href="https://discord.gg/invite-link" class="brutal-btn inline-block bg-pink-pastel text-purple-dark font-semibold py-3 px-6 text-xl mb-5 rounded-sm">
+                Hop In & Say Hi
+            </a>
+            <p class="text-purple-dark opacity-85">
+                Click to join our server—we'll greet you, show you around, and help you dive into the fun!
+            </p>
+        </div>
+
+        <!-- Footer -->
+        <div class="mt-10 pt-5">
+            <div class="divider mb-4"></div>
+            <p class="text-center text-purple-dark text-opacity-70 text-sm">
+                A welcoming space for writers of all levels
+            </p>
+        </div>
+    </div>
+</body>
+</html>
