@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en" x-data="app">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orientation Control</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        pastel: {
+                            blue: '#A7C7E7',
+                            pink: '#FFD1DC',
+                            green: '#C1E1C1',
+                            lavender: '#E6E6FA',
+                            yellow: '#FDFD96',
+                            peach: '#FFB347',
+                        }
+                    },
+                    height: {
+                        '12': '3rem',
+                    },
+                    spacing: {
+                        '4.5': '1.125rem',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .orientation-icon {
+            width: 1.25rem;
+            height: 1.25rem;
+            display: inline-block;
+            background-size: contain;
+            background-repeat: no-repeat;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+        .landscape-icon {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23333'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M4 6a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6z' /%3E%3C/svg%3E");
+        }
+        .portrait-icon {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23333'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M4 6a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6z' transform='rotate(90 12 12)' /%3E%3C/svg%3E");
+        }
+        .active-icon {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+        .ratio-option {
+            transition: all 0.2s;
+        }
+        .ratio-option:hover {
+            background-color: #E6E6FA;
+        }
+        .ratio-option.selected {
+            background-color: #A7C7E7;
+        }
+        .ratio-box {
+            transition: all 0.3s ease;
+            border-width: 2px;
+            margin: 1rem;
+        }
+        [x-cloak] { display: none !important; }
+    </style>
+</head>
+<body class="bg-pastel-lavender min-h-screen p-4" x-cloak>
+    <!-- Control Panel -->
+    <div class="bg-white rounded-lg shadow-sm p-4 border border-gray-100 mb-4">
+        <!-- Top Row - Basic Controls -->
+        <div class="flex items-center justify-between mb-4 h-12">
+            <!-- Visual Orientation Switch -->
+            <div class="flex items-center gap-3">
+<i class="fa-solid fa-play fa-rotate-270 text-gray-600" :class="{'text-blue-500': !isLandscape}"></i>
+                <button 
+                    @click="isLandscape = !isLandscape"
+                    class="relative w-14 h-7 rounded-full bg-gray-200 flex items-center transition-colors focus:outline-none focus:ring-2 focus:ring-pastel-blue"
+                >
+                    <span 
+                        class="absolute w-5 h-5 bg-white rounded-full shadow-sm transform transition-transform duration-200"
+                        :class="{'translate-x-7': isLandscape, 'translate-x-1': !isLandscape}"
+                    ></span>
+                </button>
+
+<i class="fa-solid fa-play text-gray-600" :class="{'text-blue-500': isLandscape}"></i>
+            </div>
+            
+            <!-- Length Input -->
+            <div class="flex items-center gap-2">
+                <input 
+                    type="number" 
+                    min="1" 
+                    x-model="longerSideLength" 
+                    class="w-20 h-8 px-2 rounded border border-gray-200 text-sm focus:outline-none focus:ring-1 focus:ring-pastel-blue focus:border-pastel-blue"
+                >
+                <span class="text-sm text-gray-500">px</span>
+            </div>
+        </div>
+
+        <!-- Bottom Row - Ratio Controls -->
+            <!-- Ratio Selection -->
+            <div>
+                <h3 class="text-sm font-medium text-gray-700 mb-2">Select Ratios</h3>
+                <div class="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 max-h-48 overflow-y-auto p-1">
+                    <template x-for="(ratioValue, ratioName) in ratios">
+                        <div 
+                            @click="toggleRatio(ratioName)"
+                            class="ratio-option  text-xs p-2 rounded cursor-pointer border border-gray-200 flex justify-between items-center"
+                            :class="{'selected': selectedRatios.includes(ratioName)}"
+                        >
+                            <span class="hidden md:visible" x-text="ratioName.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())"></span>
+                            <span x-text="ratioValue"></span>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+    </div>
+
+    <!-- Visual Representation -->
+    <div class="flex flex-wrap items-start">
+        <!-- Selected Ratio Boxes -->
+        <template x-for="ratio in selectedRatios" :key="ratio">
+            <div class="flex flex-col items-start m-4">
+                <div class="text-sm font-medium mb-1" x-text="
+                getHowMuchShorter(ratio)
+                "></div>
+                <div 
+                    class="ratio-box flex items-center justify-center text-gray-700"
+                    :class="{
+                        'bg-pastel-pink border-pastel-blue': selectedRatios.indexOf(ratio) % 5 === 0,
+                        'bg-pastel-green border-pastel-blue': selectedRatios.indexOf(ratio) % 5 === 1,
+                        'bg-pastel-yellow border-pastel-blue': selectedRatios.indexOf(ratio) % 5 === 2,
+                        'bg-pastel-peach border-pastel-blue': selectedRatios.indexOf(ratio) % 5 === 3,
+                        'bg-pastel-blue border-pastel-pink': selectedRatios.indexOf(ratio) % 5 === 4,
+                    }"
+                    :style="getRatioBoxStyle(ratio)"
+                    x-text="getRatioBoxText(ratio)"
+                ></div>
+            </div>
+        </template>
+    </div>
+
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('app', () => ({
+                isLandscape: true,
+                longerSideLength: 150,
+                shorterSidePercentage: 60,
+                selectedRatios: [],
+                showCustomRatio: true,
+                
+                ratios: {
+                    64: '1:64',
+                    32: '1:32',
+                    16: '1:16',
+                    8: '1:8',
+                    4: '1:4',
+                    octave: '1:2',
+                    majorSeventh: '8:15',
+                    minorSeventh: '9:16',
+                    majorSixth: '3:5',
+                    minorSixth: '5:8',
+                    majorFifth: '2:3',
+                    minorFifth: '1:1.414',
+                    majorFourth: '1:1.414',
+                    minorFourth: '3:4',
+                    majorThird: '4:5',
+                    minorThird: '5:6',
+                    majorSecond: '8:9',
+                    minorSecond: '15:16',
+                    unison: '1:1',
+                },
+
+                init() {
+                    // Load from localStorage
+                    const savedState = localStorage.getItem('orientationControl');
+                    if (savedState) {
+                        const state = JSON.parse(savedState);
+                        this.isLandscape = state.isLandscape ?? true;
+                        this.longerSideLength = state.longerSideLength ?? 150;
+                        this.shorterSidePercentage = state.shorterSidePercentage ?? 60;
+                        this.selectedRatios = state.selectedRatios ?? [];
+                        this.showCustomRatio = state.showCustomRatio ?? true;
+                    }
+                    
+                    // Save to localStorage when any value changes
+                    Alpine.effect(() => {
+                        const state = {
+                            isLandscape: this.isLandscape,
+                            longerSideLength: this.longerSideLength,
+                            shorterSidePercentage: this.shorterSidePercentage,
+                            selectedRatios: this.selectedRatios,
+                            showCustomRatio: this.showCustomRatio
+                        };
+                        localStorage.setItem('orientationControl', JSON.stringify(state));
+                    });
+                },
+
+                toggleRatio(ratioName) {
+                    if (this.selectedRatios.includes(ratioName)) {
+                        this.selectedRatios = this.selectedRatios.filter(r => r !== ratioName);
+                    } else {
+                        this.selectedRatios = [...this.selectedRatios, ratioName];
+                    }
+                },
+
+                get customShorterSideLength() {
+                    return this.longerSideLength * (this.shorterSidePercentage / 100);
+                },
+
+                getRatioBoxStyle(ratioName) {
+                    const ratio = this.ratios[ratioName];
+                    const [a, b] = ratio.split(':').map(Number);
+                    const shorterLength = this.longerSideLength * (a / b);
+                    
+                    if (this.isLandscape) {
+                        return `width: ${this.longerSideLength}px; height: ${shorterLength}px;`;
+                    } else {
+                        return `width: ${shorterLength}px; height: ${this.longerSideLength}px;`;
+                    }
+                },
+
+getHowMuchShorter(ratioName) {
+    const ratio = this.ratios[ratioName];
+    let [a, b] = ratio.split(':').map(Number);
+    
+    // Determine which is the shorter and longer side
+    const shorter = Math.min(a, b);
+    const longer = Math.max(a, b);
+    
+    // Calculate how many times shorter it is
+    const timesShorter = shorter / longer;
+    
+    // Round to 1 decimal place if not a whole number
+    const rounded = Math.round(timesShorter * 10) / 10;
+    
+    return `${timesShorter.toFixed(3)} times shorter`;
+},
+                getRatioBoxText(ratioName) {
+                    const ratio = this.ratios[ratioName];
+                    const [a, b] = ratio.split(':').map(Number);
+                    const shorterLength = this.longerSideLength * (a / b);
+                    
+                    if (this.isLandscape) {
+                        return `${this.longerSideLength} × ${shorterLength.toFixed(2)}`;
+                    } else {
+                        return `${shorterLength.toFixed(2)} × ${this.longerSideLength}`;
+                    }
+                }
+            }))
+        })
+    </script>
+</body>
+</html>
