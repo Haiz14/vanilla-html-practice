@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Mobile Container</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta property="og:title" content="Mobile Containers" />
+        <meta property="og:type" content="website" />
+
+        <script defer src="../alpine_v3.14.9.js" type="module"></script>
+        <script src="../tailwind_v4.1.5.js" type="module"></script>
+    </head>
+    <body class="bg-gray-400 flex justify-center item-center">
+        <div class="bg-gray-600 w-80 min-h-240">
+            <p class="mx-2 mt-12 text-gray-100 text-2xl">Based on 320px, 20rem width; below 1unit below=4px</p>
+            
+            <!-- Width-based sections in dropdowns -->
+            <div x-data="{ open: true }" class="my-8">
+                <button @click="open = !open" class="text-xl mx-4 text-gray-200 font-bold">Width-based Sections (Base: 320px)</button>
+                <div x-show="open" class="flex flex-col gap-4 mt-4">
+                    <div class="flex flex-col gap-4">
+                        <p class="text-xl mx-4 text-gray-200">unison, 80x80 (320x320px)</p>
+                        <div class="min-h-80 w-80 bg-gray-800"></div>
+                    </div>
+
+                    <div class="flex flex-col gap-4">
+                        <p class="text-xl mx-4 text-gray-200">eigth 80x64 (320x256px)</p>
+                        <div class="min-h-64 min-w-80 bg-gray-800"></div>
+                    </div>
+                    <div class="flex flex-col gap-4">
+                        <p class="text-xl mx-4 text-gray-200">sixth 80x48 (320x192px)</p>
+                        <div class="min-h-48 min-w-80 bg-gray-800"></div>
+                    </div>
+                    <div class="flex flex-col gap-4">
+                        <p class="text-xl mx-4 text-gray-200">half 80x32 (320x128px)</p>
+                        <div class="min-h-32 w-80 bg-gray-800"></div>
+                    </div>
+                    <div class="flex flex-col gap-4">
+                        <p class="text-xl mx-4 text-gray-200">quarter 80x16 (320x64px)</p>
+                        <div class="min-h-16 min-w-80 bg-gray-800"></div>
+                    </div>
+                    <div class="flex flex-col gap-4">
+                        <p class="text-xl mx-4 text-gray-200">tenth 80x8 (320x32px)</p>
+                        <div class="min-h-8 min-w-80 bg-gray-800"></div>
+                    </div>
+                    <div class="flex flex-col gap-4">
+                        <p class="text-xl mx-4 text-gray-200">twentieth 80x4 (320x16px)</p>
+                        <div class="min-h-4 min-w-80 bg-gray-800"></div>
+                    </div>
+                    <div class="flex flex-col gap-4">
+                        <p class="text-xl mx-4 text-gray-200">fortieth 80x2 (320x8px)</p>
+                        <div class="min-h-2 min-w-80 bg-gray-800"></div>
+                    </div>
+                    <div class="flex flex-col gap-4">
+                        <p class="text-xl mx-4 text-gray-200">eigtieth 80x1 (320x4px)</p>
+                        <div class="min-h-1 min-w-80 bg-gray-800"></div>
+                    </div>
+                    <div class="flex flex-col gap-4">
+                        <p class="text-xl mx-4 text-gray-200">one-six-tieth 80x0.5 (320x2px)</p>
+                        <div class="min-h-0.5 min-w-80 bg-gray-800"></div>
+                    </div>
+                    <div class="flex flex-col gap-4">
+                        <p class="text-xl mx-4 text-gray-200">three-twentieth 80x0.25 (320x1px)</p>
+                        <div class="min-h-0.25 min-w-80 bg-gray-800"></div>
+                    </div>
+                    <div class="flex flex-col gap-4">
+                        <p class="text-xl mx-4 text-gray-200">six-fortieth 80x[0.5px] (320x0.5px)</p>
+                        <div class="min-h-[0.5px] min-w-80 bg-gray-100"></div>
+                    </div>
+                    <div class="flex flex-col gap-4">
+                        <p class="text-xl mx-4 text-gray-200">twelve-eightieth 80x[0.25px] (320x0.25px)</p>
+                        <div class="min-h-[0.25px] min-w-80 bg-gray-100"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- New height-based section with base height 240 -->
+            <div x-data="{ open: false }" class="my-8">
+                <button @click="open = !open" class="text-xl mx-4 text-gray-200 font-bold">Height-based Sections (Base: 240px)</button>
+                <div x-show="open" class="flex flex-col gap-4 mt-4">
+                    <div class="flex flex-col gap-4">
+                        <p class="text-xl mx-4 text-gray-200">unison, 60x60 (240x240px)</p>
+                        <div class="h-60 w-60 bg-gray-800"></div>
+                    </div>
+                    <div class="flex flex-col gap-4">
+                        <p class="text-xl mx-4 text-gray-200">eigth 60x48 (240x192px)</p>
+                        <div class="h-60 w-48 bg-gray-800"></div>
+                    </div>
+                    <div class="flex flex-col gap-4">
+                        <p class="text-xl mx-4 text-gray-200">sixth 60x40 (240x160px)</p>
+                        <div class="h-60 w-40 bg-gray-800"></div>
+                    </div>
+                    <div class="flex flex-col gap-4">
+                        <p class="text-xl mx-4 text-gray-200">half 60x30 (240x120px)</p>
+                        <div class="h-60 w-30 bg-gray-800"></div>
+                    </div>
+                    <div class="flex flex-col gap-4">
+                        <p class="text-xl mx-4 text-gray-200">quarter 60x15 (240x60px)</p>
+                        <div class="h-60 w-15 bg-gray-800"></div>
+                    </div>
+                    <div class="flex flex-col gap-4">
+                        <p class="text-xl mx-4 text-gray-200">tenth 60x6 (240x24px)</p>
+                        <div class="h-60 w-6 bg-gray-800"></div>
+                    </div>
+                    <div class="flex flex-col gap-4">
+                        <p class="text-xl mx-4 text-gray-200">twentieth 60x3 (240x12px)</p>
+                        <div class="h-60 w-3 bg-gray-800"></div>
+                    </div>
+                    <div class="flex flex-col gap-4">
+                        <p class="text-xl mx-4 text-gray-200">fortieth 60x1.5 (240x6px)</p>
+                        <div class="h-60 w-1.5 bg-gray-800"></div>
+                    </div>
+                    <div class="flex flex-col gap-4">
+                        <p class="text-xl mx-4 text-gray-200">eigtieth 60x0.75 (240x3px)</p>
+                        <div class="h-60 w-0.75 bg-gray-800"></div>
+                    </div>
+                    <div class="flex flex-col gap-4">
+                        <p class="text-xl mx-4 text-gray-200">one-six-tieth 60x0.5 (240x2px)</p>
+                        <div class="h-60 w-0.5 bg-gray-800"></div>
+                    </div>
+                    <div class="flex flex-col gap-4">
+                        <p class="text-xl mx-4 text-gray-200">three-twentieth 60x0.25 (240x1px)</p>
+                        <div class="h-60 w-0.25 bg-gray-800"></div>
+                    </div>
+                    <div class="flex flex-col gap-4">
+                        <p class="text-xl mx-4 text-gray-200">six-fortieth 60x[0.5px] (240x0.5px)</p>
+                        <div class="h-60 w-[0.5px] bg-gray-300"></div>
+                    </div>
+                    <div class="flex flex-col gap-4">
+                        <p class="text-xl mx-4 text-gray-200">twelve-eightieth 60x[0.25px] (240x0.25px)</p>
+                        <div class="h-60 w-[0.25px] bg-gray-300"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
