@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta property="og:title" content="Funky patterns" />
+    <meta property="og:type" content="website" />
+    <title>Funky Pattern</title>
+  <title>p5.js Fullscreen Column Grid</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: #222;
+    }
+    canvas {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <script src="https://cdn.jsdelivr.net/npm/p5@1.9.0/lib/p5.min.js"></script>
+  <script>
+    const remSizes = [14, 7, 3.5, 1.8, 0.9, 0.45, 0.22].map(r => r * 16);
+    const gap = 2;
+
+    function setup() {
+      createCanvas(windowWidth, windowHeight);
+      frameRate(1000 / 125);
+      noStroke();
+    }
+
+    function windowResized() {
+      resizeCanvas(windowWidth, windowHeight);
+    }
+
+    function draw() {
+      background('#222');
+      let x = 0;
+      let isWhiteColumn = true;
+
+      while (x < width) {
+        const colWidth = random(remSizes);
+        const usableColWidth = colWidth - gap;
+        let y = 0;
+        let rowToggle = true;
+
+        while (y < height) {
+          const rowHeight = random(remSizes);
+          const usableRowHeight = rowHeight - gap;
+          if (y + usableRowHeight > height) break;
+
+          const colors = isWhiteColumn
+            ? ['#6b21a8', '#ffffff', '#10b981'] // deep purple, white, emerald
+            : ['#f59e0b', '#000000', '#06b6d4']; // amber, black, cyan
+
+          const mainBlockWidth = random(remSizes);
+          const usableMainBlockWidth = mainBlockWidth - gap;
+          const spaceLeft = usableColWidth - usableMainBlockWidth - gap;
+
+          fill(colors[rowToggle ? 0 : 1]);
+          rect(x, y, usableMainBlockWidth, usableRowHeight);
+
+          if (spaceLeft > 0) {
+            const secondBlockWidth = random(remSizes);
+            if (secondBlockWidth <= spaceLeft) {
+              fill(colors[2]); // emerald or cyan
+              rect(x + usableMainBlockWidth + gap, y, secondBlockWidth - gap, usableRowHeight);
+            }
+          }
+
+          y += rowHeight;
+          rowToggle = !rowToggle;
+        }
+
+        x += colWidth;
+        isWhiteColumn = !isWhiteColumn;
+      }
+    }
+  </script>
+</body>
+</html>
