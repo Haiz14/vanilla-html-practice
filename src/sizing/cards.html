@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Typography Cards with Oswald & Baskerville</title>
+    <meta property="og:title" content="Typography Cards with Oswald & Baskerville" />
+    <meta property="og:type" content="website" />
+
+    <script defer src="https://cloud.umami.is/script.js" data-website-id="2c9c4153-be1f-49a7-a084-59e6d885201b"></script>
+    <script defer src="../alpine_v3.14.9.js" type="module"></script>
+    <script src="../tailwind_v4.1.5.js" type="module"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&family=Baskervville&display=swap" rel="stylesheet">
+    <style>
+        .oswald {
+            font-family: 'Oswald', sans-serif;
+        }
+        .baskervville {
+            font-family: 'Baskervville', serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-2" x-data>
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-3xl font-medium mb-4 text-center oswald">Card Variations with Mixed Typography</h1>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <template x-for="(card, index) in [
+                { titleSize: 'text-2xl', descSize: 'text-lg', btnSize: 'text-lg', titlePx: '24px', descPx: '18px' },
+                { titleSize: 'text-xl', descSize: 'text-lg', btnSize: 'text-base', titlePx: '20px', descPx: '18px' },
+                { titleSize: 'text-xl', descSize: 'text-base', btnSize: 'text-sm', titlePx: '20px', descPx: '16px' },
+                { titleSize: 'text-2xl', descSize: 'text-base', btnSize: 'text-base', titlePx: '24px', descPx: '16px' }
+            ]" :key="index">
+                <div>
+                    <div class="bg-gray-200 p-2 rounded-t-lg text-center text-sm font-mono">
+                        <span x-text="`Title: ${card.titlePx} | Desc: ${card.descPx}`"></span>
+                    </div>
+                    <div class="bg-white rounded-b-lg shadow-md overflow-hidden">
+                        <div class="p-6">
+                            <h3 :class="`${card.titleSize} font-medium mb-4 oswald`">Wonderful serenity has taken possession of my soul</h3>
+                            <p :class="`${card.descSize} mb-6 baskervville`">Like these sweet mornings of spring which I enjoy with my whole heart. I am alone, and feel the charm of existence in this spot.</p>
+                            <div class="flex space-x-4 text-sm" :class="card.btnSize">
+                                <button class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition baskervville">Action One</button>
+                                <button class="px-4 py-2 border border-gray-300 rounded hover:bg-gray-100 transition baskervville">Action Two</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+</body>
+</html>
+
