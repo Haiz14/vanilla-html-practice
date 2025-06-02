@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en" x-data="colorSystem">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Orange Saturation System</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+    <meta property="og:title" content="Orange Stauration" />
+    <meta property="og:type" content="website" />
+
+    <script defer src="../alpine_v3.14.9.js" type="module"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            // Precise saturation levels
+            'neon-orange': {  // 100% saturation
+              50: '#fff0e5', 100: '#ffd6b8', 200: '#ffbc8a',
+              300: '#ffa25c', 400: '#ff882e', 500: '#ff6e00',
+              600: '#cc5800', 700: '#994200', 800: '#662c00', 900: '#331600'
+            },
+            'orange': {  // 85% saturation (Tailwind's original orange)
+              50: '#fff7ed', 100: '#ffedd5', 200: '#fed7aa',
+              300: '#fdba74', 400: '#fb923c', 500: '#f97316',
+              600: '#ea580c', 700: '#c2410c', 800: '#9a3412', 900: '#7c2d12'
+            },
+            'pastel-orange': {  // 60% saturation
+              50: '#fef3e7', 100: '#fce1c5', 200: '#facfa3',
+              300: '#f9bd81', 400: '#f7ab5f', 500: '#f5993d',
+              600: '#c47a31', 700: '#935c25', 800: '#623d19', 900: '#311f0c'
+            },
+            'muted-orange': {  // 40% saturation
+              50: '#f5f0ea', 100: '#e6d9c9', 200: '#d7c2a8',
+              300: '#c8ab87', 400: '#b99466', 500: '#aa7d45',
+              600: '#886437', 700: '#664b29', 800: '#44321b', 900: '#22190e'
+            },
+            'grayish-orange': {  // 20% saturation
+              50: '#f0eeeb', 100: '#dad5ce', 200: '#c4bcb1',
+              300: '#aea394', 400: '#988a77', 500: '#82715a',
+              600: '#685a48', 700: '#4e4436', 800: '#342d24', 900: '#1a1712'
+            },
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .color-card {
+      width: 140px;
+      height: 80px;
+    }
+    .saturation-bar {
+      height: 24px;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen p-6" x-data="colorSystem">
+  <div class="max-w-6xl mx-auto">
+    <header class="mb-12 text-center">
+      <h1 class="text-4xl font-bold text-orange-600 mb-2">Orange Saturation System</h1>
+      <p class="text-gray-600">From vibrant neon to subtle grays</p>
+    </header>
+
+    <!-- Saturation Scale Visualization -->
+    <section class="mb-16">
+      <h2 class="text-2xl font-semibold text-gray-800 mb-6 text-center">Saturation Spectrum</h2>
+      <div class="flex flex-col items-center">
+        <div class="w-full max-w-2xl rounded-lg overflow-hidden shadow-lg">
+          <div class="saturation-bar bg-neon-orange-500"></div>
+          <div class="saturation-bar bg-orange-500"></div>
+          <div class="saturation-bar bg-pastel-orange-500"></div>
+          <div class="saturation-bar bg-muted-orange-500"></div>
+          <div class="saturation-bar bg-grayish-orange-500"></div>
+        </div>
+        <div class="w-full max-w-2xl flex justify-between mt-2 text-sm text-gray-600">
+          <span>100% Neon</span>
+          <span>85% Vibrant</span>
+          <span>60% Pastel</span>
+          <span>40% Muted</span>
+          <span>20% Grayish</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Palette Navigation -->
+    <nav class="flex flex-wrap justify-center gap-3 mb-8">
+      <template x-for="palette in palettes">
+        <button 
+          @click="activePalette = palette.id"
+          class="px-4 py-2 rounded-full text-sm font-medium transition-all"
+          :class="{
+            'bg-orange-500 text-white shadow-md': activePalette === palette.id,
+            'bg-white text-gray-700 hover:bg-gray-100': activePalette !== palette.id
+          }"
+          x-text="palette.name"
+        ></button>
+      </template>
+    </nav>
+
+    <!-- Active Palette Display -->
+    <section class="mb-16">
+      <template x-for="palette in palettes">
+        <div x-show="activePalette === palette.id" class="animate-fade-in">
+          <h2 class="text-xl font-semibold mb-4 text-center" x-text="palette.name + ' Palette'"></h2>
+          <div class="flex flex-wrap justify-center gap-3">
+            <template x-for="shade in [50,100,200,300,400,500,600,700,800,900]">
+              <div 
+                class="color-card rounded-lg shadow-sm flex flex-col items-center justify-center transition-transform hover:scale-105"
+                :class="`bg-${palette.id}-${shade}`"
+              >
+                <span 
+                  class="text-xs font-mono font-bold mb-1"
+                  :class="shade < 400 ? 'text-gray-800' : 'text-white'"
+                  x-text="palette.id + '-' + shade"
+                ></span>
+                <span 
+                  class="text-[10px] font-mono"
+                  :class="shade < 400 ? 'text-gray-700' : 'text-white/80'"
+                  x-text="palette.hexValues[shade/50 - 1]"
+                ></span>
+              </div>
+            </template>
+          </div>
+        </div>
+      </template>
+    </section>
+
+    <!-- Full System Display -->
+    <section>
+      <h2 class="text-2xl font-semibold text-gray-800 mb-6 text-center">Complete Color System</h2>
+      <div class="space-y-12">
+        <template x-for="palette in palettes">
+          <div>
+            <h3 class="text-lg font-medium mb-3 flex items-center">
+              <span class="w-24 inline-block" x-text="palette.name"></span>
+              <span class="text-sm text-gray-500 ml-2" x-text="palette.saturation + ' saturation'"></span>
+            </h3>
+            <div class="flex flex-wrap gap-1 mb-6">
+              <template x-for="shade in [50,100,200,300,400,500,600,700,800,900]">
+                <div 
+                  class="h-10 w-10 rounded-sm shadow-xs flex items-center justify-center"
+                  :class="`bg-${palette.id}-${shade}`"
+                >
+                  <span 
+                    class="text-[8px] font-mono"
+                    :class="shade < 400 ? 'text-gray-800' : 'text-white'"
+                    x-text="shade"
+                  ></span>
+                </div>
+              </template>
+            </div>
+          </div>
+        </template>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    document.addEventListener('alpine:init', () => {
+      Alpine.data('colorSystem', () => ({
+        activePalette: 'neon-orange',
+        palettes: [
+          {
+            id: 'neon-orange',
+            name: 'Neon Orange',
+            saturation: '100%',
+            hexValues: [
+              '#fff0e5', '#ffd6b8', '#ffbc8a', '#ffa25c', '#ff882e',
+              '#ff6e00', '#cc5800', '#994200', '#662c00', '#331600'
+            ]
+          },
+          {
+            id: 'orange',
+            name: 'Vibrant Orange',
+            saturation: '85%',
+            hexValues: [
+              '#fff7ed', '#ffedd5', '#fed7aa', '#fdba74', '#fb923c',
+              '#f97316', '#ea580c', '#c2410c', '#9a3412', '#7c2d12'
+            ]
+          },
+          {
+            id: 'pastel-orange',
+            name: 'Pastel Orange',
+            saturation: '60%',
+            hexValues: [
+              '#fef3e7', '#fce1c5', '#facfa3', '#f9bd81', '#f7ab5f',
+              '#f5993d', '#c47a31', '#935c25', '#623d19', '#311f0c'
+            ]
+          },
+          {
+            id: 'muted-orange',
+            name: 'Muted Orange',
+            saturation: '40%',
+            hexValues: [
+              '#f5f0ea', '#e6d9c9', '#d7c2a8', '#c8ab87', '#b99466',
+              '#aa7d45', '#886437', '#664b29', '#44321b', '#22190e'
+            ]
+          },
+          {
+            id: 'grayish-orange',
+            name: 'Grayish Orange',
+            saturation: '20%',
+            hexValues: [
+              '#f0eeeb', '#dad5ce', '#c4bcb1', '#aea394', '#988a77',
+              '#82715a', '#685a48', '#4e4436', '#342d24', '#1a1712'
+            ]
+          },
+        ]
+      }))
+    })
+  </script>
+</body>
+</html>
