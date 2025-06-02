@@ -3,51 +3,106 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Typography Cards with Oswald & Baskerville</title>
-    <meta property="og:title" content="Typography Cards with Oswald & Baskerville" />
-    <meta property="og:type" content="website" />
-
-    <script defer src="https://cloud.umami.is/script.js" data-website-id="2c9c4153-be1f-49a7-a084-59e6d885201b"></script>
-    <script defer src="../alpine_v3.14.9.js" type="module"></script>
-    <script src="../tailwind_v4.1.5.js" type="module"></script>
-
-    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&family=Baskervville&display=swap" rel="stylesheet">
+    <title>Tailwind CSS Cards with Dimension Labels</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .oswald {
-            font-family: 'Oswald', sans-serif;
+        .card-grid {
+            display: grid;
+            gap: 2rem;
+            padding: 1.5rem;
+            max-width: 72rem;
+            margin: 0 auto;
         }
-        .baskervville {
-            font-family: 'Baskervville', serif;
+        @media (min-width: 768px) {
+            .card-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        .dimension-label {
+            background-color: rgba(0,0,0,0.7);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-family: monospace;
+            margin-bottom: 0.5rem;
+            display: inline-block;
         }
     </style>
 </head>
-<body class="bg-gray-100 p-2" x-data>
-    <div class="max-w-6xl mx-auto">
-        <h1 class="text-3xl font-medium mb-4 text-center oswald">Card Variations with Mixed Typography</h1>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <template x-for="(card, index) in [
-                { titleSize: 'text-2xl', descSize: 'text-lg', btnSize: 'text-lg', titlePx: '24px', descPx: '18px' },
-                { titleSize: 'text-xl', descSize: 'text-lg', btnSize: 'text-base', titlePx: '20px', descPx: '18px' },
-                { titleSize: 'text-xl', descSize: 'text-base', btnSize: 'text-sm', titlePx: '20px', descPx: '16px' },
-                { titleSize: 'text-2xl', descSize: 'text-base', btnSize: 'text-base', titlePx: '24px', descPx: '16px' }
-            ]" :key="index">
-                <div>
-                    <div class="bg-gray-200 p-2 rounded-t-lg text-center text-sm font-mono">
-                        <span x-text="`Title: ${card.titlePx} | Desc: ${card.descPx}`"></span>
-                    </div>
-                    <div class="bg-white rounded-b-lg shadow-md overflow-hidden">
-                        <div class="p-6">
-                            <h3 :class="`${card.titleSize} font-medium mb-4 oswald`">Wonderful serenity has taken possession of my soul</h3>
-                            <p :class="`${card.descSize} mb-6 baskervville`">Like these sweet mornings of spring which I enjoy with my whole heart. I am alone, and feel the charm of existence in this spot.</p>
-                            <div class="flex space-x-4 text-sm" :class="card.btnSize">
-                                <button class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition baskervville">Action One</button>
-                                <button class="px-4 py-2 border border-gray-300 rounded hover:bg-gray-100 transition baskervville">Action Two</button>
-                            </div>
+<body class="bg-gray-50">
+    <div class="card-grid">
+        <!-- 320x450 Card -->
+        <div class="card-container">
+            <span class="dimension-label">320 × 450</span>
+            <div class="w-80 h-[450px] bg-white rounded-xl shadow-md overflow-hidden flex flex-col">
+                <img class="w-full h-48 object-cover" src="https://picsum.photos/320/240?random=1" alt="Mountain landscape">
+                <div class="p-6 flex flex-col flex-grow">
+                    <div class="text-xs font-semibold text-blue-600 uppercase tracking-wide">Travel</div>
+                    <h2 class="mt-1 text-xl font-medium text-gray-900">Mountain Adventure</h2>
+                    <p class="mt-2 text-gray-500 flex-grow">Experience the breathtaking views of mountain ranges with our guided tours. Perfect for adventure seekers and nature lovers alike.</p>
+                    <div class="mt-4 flex items-center">
+                        <img class="h-10 w-10 rounded-full" src="https://picsum.photos/100/100?random=2" alt="Guide">
+                        <div class="ml-3">
+                            <p class="text-sm font-medium text-gray-900">John Smith</p>
+                            <p class="text-sm text-gray-500">Professional Guide</p>
                         </div>
                     </div>
                 </div>
-            </template>
+            </div>
+        </div>
+
+        <!-- 320x240 Card -->
+        <div class="card-container">
+            <span class="dimension-label">320 × 240</span>
+            <div class="w-80 h-60 bg-white rounded-lg shadow-md overflow-hidden flex flex-col">
+                <div class="h-32 bg-cover bg-center" style="background-image: url('https://picsum.photos/320/240?random=3')">
+                    <div class="h-full w-full bg-black bg-opacity-40 flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="p-4 flex-grow">
+                    <h3 class="text-lg font-semibold text-gray-800">Create New Project</h3>
+                    <p class="mt-1 text-gray-600">Start building your next great idea with our platform.</p>
+                </div>
+                <div class="px-4 py-3 bg-gray-50">
+                    <button class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md text-sm font-medium transition duration-150">
+                        Get Started
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 320x120 Card -->
+        <div class="card-container">
+            <span class="dimension-label">320 × 120</span>
+            <div class="w-80 h-30 bg-white rounded-md shadow-sm overflow-hidden flex items-center p-4 border border-gray-200">
+                <div class="bg-green-100 p-3 rounded-full">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                </div>
+                <div class="ml-4">
+                    <h4 class="text-base font-medium text-gray-900">Order Confirmed</h4>
+                    <p class="text-sm text-gray-500">Your order #12345 has been processed</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 320x60 Card -->
+        <div class="card-container">
+            <span class="dimension-label">320 × 60</span>
+            <div class="w-80 h-15 bg-indigo-600 rounded-md shadow overflow-hidden flex items-center justify-between px-4 py-3">
+                <div class="flex items-center">
+                    <img class="h-8 w-8 rounded-full mr-3" src="https://picsum.photos/100/100?random=4" alt="Promo">
+                    <span class="text-white font-medium">Limited Time Offer</span>
+                </div>
+                <button class="text-indigo-100 hover:text-white text-sm font-semibold underline">
+                    Claim Now →
+                </button>
+            </div>
         </div>
     </div>
 </body>
