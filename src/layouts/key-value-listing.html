@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Love in Colors</title>
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+    <style>
+        :root {
+            --space-min: 4rem;
+            --space-max: 12rem;
+            
+            /* OKLCH color palette */
+            --red: oklch(70% 0.2 29);
+            --orange: oklch(75% 0.18 55);
+            --yellow: oklch(85% 0.15 90);
+            --green: oklch(75% 0.18 145);
+            --blue: oklch(65% 0.2 245);
+            --purple: oklch(70% 0.18 300);
+            --pink: oklch(80% 0.18 350);
+            
+            --text-dark: oklch(20% 0.05 290);
+            --text-light: oklch(95% 0.01 290);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: var(--text-dark);
+            line-height: 1.5;
+            background-color: oklch(98% 0.01 290);
+            padding: var(--space-min);
+        }
+
+        h1, h2, h3, .card h3 {
+            font-family: 'Roboto Slab', serif;
+            font-weight: bold;
+        }
+
+        h1 {
+            font-size: 4xl;
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            margin-bottom: var(--space-min);
+        }
+
+        h2 {
+            font-size: 2xl;
+            font-size: clamp(1.75rem, 3vw, 2.5rem);
+            margin-bottom: calc(var(--space-min) * 0.75);
+        }
+
+        h3 {
+            font-size: xl;
+            font-size: clamp(1.25rem, 2vw, 1.75rem);
+        }
+
+        p, .card p {
+            font-size: lg;
+            font-size: clamp(1rem, 1.5vw, 1.25rem);
+            max-width: 65ch;
+        }
+
+        header {
+            margin-bottom: var(--space-max);
+            max-width: 80ch;
+        }
+
+        .cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: var(--space-min);
+            margin-bottom: var(--space-max);
+        }
+
+        .card {
+            padding: 2rem;
+            border-radius: 1rem;
+            color: var(--text-light);
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%);
+            z-index: 1;
+        }
+
+        .card h3, .card p {
+            position: relative;
+            z-index: 2;
+        }
+
+        .card h3 {
+            margin-bottom: 0.5rem;
+        }
+
+        .card p {
+            opacity: 0.9;
+        }
+
+        /* Individual card colors */
+        .card:nth-child(1) { background-color: var(--red); }
+        .card:nth-child(2) { background-color: var(--orange); }
+        .card:nth-child(3) { background-color: var(--yellow); color: var(--text-dark); }
+        .card:nth-child(3)::before { background: linear-gradient(to top, rgba(255,255,255,0.5) 0%, transparent 100%); }
+        .card:nth-child(4) { background-color: var(--green); }
+        .card:nth-child(5) { background-color: var(--blue); }
+        .card:nth-child(6) { background-color: var(--purple); }
+        .card:nth-child(7) { background-color: var(--pink); }
+        .card:nth-child(8) { background-color: oklch(60% 0.2 200); }
+
+        footer {
+            margin-top: var(--space-max);
+            padding-top: var(--space-min);
+            border-top: 1px solid oklch(80% 0.02 290);
+        }
+
+        /* Animation styles */
+        [data-aos] {
+            transition-property: opacity, transform;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 2rem;
+            }
+            
+            .cards-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Roboto+Slab:wght@700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header data-aos="fade-up">
+        <h1>Love in All Its Forms</h1>
+        <p>Exploring the many dimensions of love through colors and words. Each card represents a unique aspect of this powerful emotion that connects us all.</p>
+    </header>
+
+    <main>
+        <h2 data-aos="fade-up">Manifestations of Love</h2>
+        <div class="cards-container">
+            <div class="card" data-aos="fade-up" data-aos-delay="100">
+                <h3>Romantic Love</h3>
+                <p>Passion that sets hearts ablaze and souls on fire.</p>
+            </div>
+            
+            <div class="card" data-aos="fade-up" data-aos-delay="150">
+                <h3>Familial Love</h3>
+                <p>Unbreakable bonds woven through shared history.</p>
+            </div>
+            
+            <div class="card" data-aos="fade-up" data-aos-delay="200">
+                <h3>Self-Love</h3>
+                <p>The foundation for all other love to flourish.</p>
+            </div>
+            
+            <div class="card" data-aos="fade-up" data-aos-delay="250">
+                <h3>Platonic Love</h3>
+                <p>Deep connection without romantic entanglement.</p>
+            </div>
+            
+            <div class="card" data-aos="fade-up" data-aos-delay="300">
+                <h3>Universal Love</h3>
+                <p>Compassion extending to all living beings.</p>
+            </div>
+            
+            <div class="card" data-aos="fade-up" data-aos-delay="350">
+                <h3>Enduring Love</h3>
+                <p>Steadfast through time's tests and trials.</p>
+            </div>
+            
+            <div class="card" data-aos="fade-up" data-aos-delay="400">
+                <h3>Playful Love</h3>
+                <p>Lighthearted joy in shared moments.</p>
+            </div>
+            
+            <div class="card" data-aos="fade-up" data-aos-delay="450">
+                <h3>Sacrificial Love</h3>
+                <p>Giving without expectation of return.</p>
+            </div>
+        </div>
+    </main>
+
+    <footer data-aos="fade-up">
+        <p>Love is the thread that weaves humanity together.</p>
+    </footer>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+    <script>
+        AOS.init({
+            duration: 800,
+            once: true,
+            easing: 'ease-out-quad',
+            offset: 100
+        });
+    </script>
+</body>
+</html>
