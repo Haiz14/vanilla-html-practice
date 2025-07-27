@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Typography Variations</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Just+Me+Again+Down+Here&family=Rubik+Glitch&family=Rubik:wght@800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .color-panel {
+            padding: 1rem;
+            background: #f0f0f0;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .color-option {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        
+        .variant {
+            margin: 2rem 0;
+            text-align: center;
+        }
+        
+        /* Variant One Styles */
+        .variant-one-line1 {
+            font-family: 'Rubik', sans-serif;
+            font-weight: 300;
+            font-size: 3rem;
+            line-height: 1.4;
+        }
+        
+        .variant-one-line2 {
+            font-family: 'Rubik', sans-serif;
+            font-weight: 300;
+            font-size: 2rem;
+            line-height: 1.4;
+        }
+        
+        .variant-one-line3 {
+            font-family: 'Rubik Glitch', system-ui;
+            font-size: 4.5rem;
+            line-height: 1;
+        }
+        
+        .variant-one-line4 {
+            font-family: 'Rubik Glitch', system-ui;
+            font-size: 4.5rem;
+            line-height: 1;
+        }
+        
+        /* Variant Two Styles */
+        .variant-two {
+            font-family: 'Just Me Again Down Here', cursive;
+            font-size: 3.5rem;
+            line-height: 1.2;
+        }
+    </style>
+</head>
+<body x-data="{
+    bgColor: 'hsl(197, 71%, 73%)', // Sky blue
+    textColor: 'hsl(0, 0%, 20%)', // neutral-800
+    textHue: 0,
+    textSaturation: 0,
+    textLightness: 20,
+    hue: 197,
+    saturation: 71,
+    lightness: 73,
+    updateColor() {
+        this.bgColor = `hsl(${this.hue}, ${this.saturation}%, ${this.lightness}%)`;
+    },
+    updateTextColor() {
+        this.textColor = `hsl(${this.textHue}, ${this.textSaturation}%, ${this.textLightness}%)`;
+    }
+}">
+    <div class="color-panel bg-neutral-300 md:justify-center md:items-center">
+        <div class="color-option">
+            <label for="hue" class="text-neutral-800">BG Hue:</label>
+            <input type="range" id="hue" min="0" max="360" x-model="hue" @input="updateColor" class="accent-neutral-600">
+            <span x-text="hue" class="text-neutral-800"></span>
+        </div>
+        <div class="color-option">
+            <label for="saturation" class="text-neutral-800">BG Saturation:</label>
+            <input type="range" id="saturation" min="0" max="100" x-model="saturation" @input="updateColor" class="accent-neutral-600">
+            <span x-text="saturation + '%'" class="text-neutral-800"></span>
+        </div>
+        <div class="color-option">
+            <label for="lightness" class="text-neutral-800">BG Lightness:</label>
+            <input type="range" id="lightness" min="0" max="100" x-model="lightness" @input="updateColor" class="accent-neutral-600">
+            <span x-text="lightness + '%'" class="text-neutral-800"></span>
+        </div>
+        
+        <!-- Text Color HSL Controls -->
+        <div class="color-option mt-4 md:mt-0">
+            <label for="textHue" class="text-neutral-800">Text Hue:</label>
+            <input type="range" id="textHue" min="0" max="360" x-model="textHue" @input="updateTextColor" class="accent-neutral-600">
+            <span x-text="textHue" class="text-neutral-800"></span>
+        </div>
+        <div class="color-option">
+            <label for="textSaturation" class="text-neutral-800">Text Saturation:</label>
+            <input type="range" id="textSaturation" min="0" max="100" x-model="textSaturation" @input="updateTextColor" class="accent-neutral-600">
+            <span x-text="textSaturation + '%'" class="text-neutral-800"></span>
+        </div>
+        <div class="color-option">
+            <label for="textLightness" class="text-neutral-800">Text Lightness:</label>
+            <input type="range" id="textLightness" min="0" max="100" x-model="textLightness" @input="updateTextColor" class="accent-neutral-600">
+            <span x-text="textLightness + '%'" class="text-neutral-800"></span>
+        </div>
+    </div>
+    
+    <div class="text-center px-8 w-full sm:h-[100dvh]" x-bind:style="`background-color: ${bgColor}; color: ${textColor};`">
+        <!-- Variant One -->
+        
+        
+        <!-- Variant Two -->
+        <div class="variant variant-two my-40">
+            <div>Can people stay with you</div>
+            <div>in good times?</div>
+        </div>
+<div class="variant my-28">
+            <div class="variant-one-line1">Can people stay</div>
+            <div class="variant-one-line2">with you in</div>
+            <div class="variant-one-line3">good times?</div>
+        </div>
+		</div>
+</body>
+</html>
